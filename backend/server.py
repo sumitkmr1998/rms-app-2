@@ -317,7 +317,13 @@ async def create_user(user: UserCreate):
     user_dict["password_hash"] = password_hash
     
     user_obj = User(**user_dict)
-    await db.users.insert_one(user_obj.dict())
+    
+    # Convert datetime objects to serializable format for MongoDB
+    user_data = user_obj.dict()
+    if isinstance(user_data.get('created_at'), datetime):
+        user_data['created_at'] = user_data['created_at'].isoformat()
+    
+    await db.users.insert_one(user_data)
     return user_obj
 
 @api_router.get("/users", response_model=List[User])
