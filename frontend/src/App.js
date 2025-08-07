@@ -750,31 +750,73 @@ const App = () => {
   // Users View
   const UsersView = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">User Management</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">User Management</h2>
+        <div className="text-sm text-gray-600">
+          <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
+          <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">Ctrl+S</kbd> for Sales
+        </div>
+      </div>
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="p-4 bg-gray-50 border-b">
+          <h3 className="font-semibold text-gray-800">System Users & Permissions</h3>
+          <p className="text-sm text-gray-600 mt-1">Manage user access and roles for the pharmacy system</p>
+        </div>
+        
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permissions</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id}>
+            {users.map((user, index) => (
+              <tr key={user.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {user.username}
+                  <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-3 ${
+                      user.role === 'admin' ? 'bg-red-500' :
+                      user.role === 'manager' ? 'bg-blue-500' : 'bg-green-500'
+                    }`}></div>
+                    {user.username}
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                  {user.role}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                    user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                    user.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                    'bg-green-100 text-green-800'
+                  }`}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {user.is_active ? 'Active' : 'Inactive'}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.is_active ? '✓ Active' : '✗ Inactive'}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div className="flex flex-wrap gap-1">
+                    {user.permissions?.can_modify_stock && (
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Stock Modify</span>
+                    )}
+                    {user.permissions?.can_block_backdate && (
+                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Block Backdate</span>
+                    )}
+                    {user.permissions?.can_manage_users && (
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Manage Users</span>
+                    )}
+                    {user.permissions?.can_view_reports && (
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">View Reports</span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(user.created_at).toLocaleDateString()}
@@ -783,6 +825,51 @@ const App = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* User Role Descriptions */}
+      <div className="mt-6 grid grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center mb-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+            <h4 className="font-semibold text-red-700">Admin</h4>
+          </div>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• Full system access</li>
+            <li>• User management</li>
+            <li>• Stock modification</li>
+            <li>• All reports access</li>
+            <li>• System configuration</li>
+          </ul>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center mb-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+            <h4 className="font-semibold text-blue-700">Manager</h4>
+          </div>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• POS operations</li>
+            <li>• Stock modification</li>
+            <li>• Sales reports</li>
+            <li>• Inventory management</li>
+            <li>• Customer management</li>
+          </ul>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex items-center mb-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+            <h4 className="font-semibold text-green-700">Cashier</h4>
+          </div>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• POS operations only</li>
+            <li>• Process sales</li>
+            <li>• View inventory</li>
+            <li>• Basic customer service</li>
+            <li>• No system changes</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
