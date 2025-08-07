@@ -39,41 +39,155 @@ const App = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Alt + P for POS
-      if (e.altKey && e.key === 'p') {
-        e.preventDefault();
-        setCurrentView('pos');
+      // Don't trigger shortcuts if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        // Handle Enter key in search
+        if (e.key === 'Enter' && e.target === searchRef.current) {
+          e.preventDefault();
+          if (medicines.length > 0) {
+            addToCart(medicines[selectedMedicineIndex]);
+          }
+        }
+        // Handle Escape to blur input
+        if (e.key === 'Escape') {
+          e.target.blur();
+        }
+        return;
       }
-      // Alt + I for Inventory
-      if (e.altKey && e.key === 'i') {
-        e.preventDefault();
-        setCurrentView('inventory');
-      }
-      // Alt + S for Sales
-      if (e.altKey && e.key === 's') {
-        e.preventDefault();
-        setCurrentView('sales');
-      }
-      // Alt + U for Users
-      if (e.altKey && e.key === 'u') {
-        e.preventDefault();
-        setCurrentView('users');
-      }
-      // F1 for Search focus
-      if (e.key === 'F1') {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-      // F2 for Checkout
-      if (e.key === 'F2' && cart.length > 0) {
-        e.preventDefault();
-        handleCheckout();
+
+      // Global shortcuts
+      switch (e.key) {
+        // Navigation shortcuts
+        case 'p':
+        case 'P':
+          if (e.ctrlKey || e.altKey) {
+            e.preventDefault();
+            setCurrentView('pos');
+          }
+          break;
+        case 'i':
+        case 'I':
+          if (e.ctrlKey || e.altKey) {
+            e.preventDefault();
+            setCurrentView('inventory');
+          }
+          break;
+        case 's':
+        case 'S':
+          if (e.ctrlKey || e.altKey) {
+            e.preventDefault();
+            setCurrentView('sales');
+          }
+          break;
+        case 'u':
+        case 'U':
+          if (e.ctrlKey || e.altKey) {
+            e.preventDefault();
+            setCurrentView('users');
+          }
+          break;
+
+        // POS specific shortcuts
+        case 'F1':
+          e.preventDefault();
+          searchRef.current?.focus();
+          break;
+        case 'F2':
+          if (cart.length > 0) {
+            e.preventDefault();
+            handleCheckout();
+          }
+          break;
+        case 'F3':
+          e.preventDefault();
+          setCart([]);
+          break;
+        case 'F4':
+          e.preventDefault();
+          customerNameRef.current?.focus();
+          break;
+        case 'F5':
+          e.preventDefault();
+          setPaymentMethod(paymentMethod === 'cash' ? 'card' : paymentMethod === 'card' ? 'upi' : 'cash');
+          break;
+
+        // Quick navigation in medicine list
+        case 'ArrowDown':
+          if (currentView === 'pos' && medicines.length > 0) {
+            e.preventDefault();
+            setSelectedMedicineIndex(prev => (prev + 1) % medicines.length);
+          }
+          break;
+        case 'ArrowUp':
+          if (currentView === 'pos' && medicines.length > 0) {
+            e.preventDefault();
+            setSelectedMedicineIndex(prev => prev === 0 ? medicines.length - 1 : prev - 1);
+          }
+          break;
+        case 'Enter':
+          if (currentView === 'pos' && medicines.length > 0) {
+            e.preventDefault();
+            addToCart(medicines[selectedMedicineIndex]);
+          }
+          break;
+
+        // Quick quantity shortcuts
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          if (currentView === 'pos' && !e.ctrlKey && !e.altKey) {
+            e.preventDefault();
+            setQuickQuantity(prev => prev + e.key);
+            setIsQuickEntry(true);
+            setTimeout(() => setIsQuickEntry(false), 2000);
+          }
+          break;
+
+        case '+':
+        case '=':
+          if (currentView === 'pos' && quickQuantity && medicines.length > 0) {
+            e.preventDefault();
+            const qty = parseInt(quickQuantity) || 1;
+            const medicine = medicines[selectedMedicineIndex];
+            addMultipleToCart(medicine, qty);
+            setQuickQuantity('');
+            setIsQuickEntry(false);
+          }
+          break;
+
+        // Clear shortcuts
+        case 'Escape':
+          setQuickQuantity('');
+          setIsQuickEntry(false);
+          break;
+        case 'Backspace':
+          if (currentView === 'pos' && quickQuantity) {
+            e.preventDefault();
+            setQuickQuantity(prev => prev.slice(0, -1));
+          }
+          break;
+
+        // Quick search focus
+        case '/':
+          e.preventDefault();
+          searchRef.current?.focus();
+          searchRef.current?.select();
+          break;
+
+        default:
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [cart]);
+  }, [cart, medicines, selectedMedicineIndex, quickQuantity, currentView, paymentMethod]);
 
   // API functions
   const fetchMedicines = async (search = '') => {
