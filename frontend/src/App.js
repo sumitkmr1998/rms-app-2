@@ -591,7 +591,23 @@ const App = () => {
   // Inventory View
   const InventoryView = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Medicine Inventory</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Medicine Inventory</h2>
+        <div className="text-sm text-gray-600">
+          <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
+          <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">/</kbd> to search
+        </div>
+      </div>
+      
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Filter inventory... (Press / to focus)"
+          className="w-full max-w-md p-3 border rounded-lg"
+          value={searchTerm}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+      </div>
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full">
@@ -603,17 +619,18 @@ const App = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {medicines.map((medicine) => (
-              <tr key={medicine.id}>
+            {medicines.map((medicine, index) => (
+              <tr key={medicine.id} className={index === selectedMedicineIndex && currentView === 'inventory' ? 'bg-blue-50' : ''}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {medicine.name}
                 </td>
                 <td className={`px-6 py-4 whitespace-nowrap text-sm ${medicine.stock_quantity < 10 ? 'text-red-600 font-bold' : 'text-gray-900'}`}>
                   {medicine.stock_quantity}
-                  {medicine.stock_quantity < 10 && <span className="ml-1 text-xs">(Low Stock)</span>}
+                  {medicine.stock_quantity < 10 && <span className="ml-1 text-xs">⚠️ Low Stock</span>}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ₹{medicine.price}
@@ -627,10 +644,46 @@ const App = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {medicine.batch_number}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <button
+                    onClick={() => addToCart(medicine)}
+                    className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                  >
+                    Add to Cart
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-6 bg-white p-4 rounded-lg shadow">
+        <h3 className="font-semibold mb-2">Inventory Summary</h3>
+        <div className="grid grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-2xl font-bold text-blue-600">{medicines.length}</div>
+            <div className="text-sm text-gray-600">Total Items</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-green-600">
+              {medicines.reduce((sum, med) => sum + med.stock_quantity, 0)}
+            </div>
+            <div className="text-sm text-gray-600">Total Units</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-red-600">
+              {medicines.filter(med => med.stock_quantity < 10).length}
+            </div>
+            <div className="text-sm text-gray-600">Low Stock Items</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-purple-600">
+              ₹{medicines.reduce((sum, med) => sum + (med.price * med.stock_quantity), 0).toFixed(2)}
+            </div>
+            <div className="text-sm text-gray-600">Total Value</div>
+          </div>
+        </div>
       </div>
     </div>
   );
