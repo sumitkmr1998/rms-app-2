@@ -237,28 +237,38 @@ const App = () => {
     }
   };
 
-  // POS functions
-  const addToCart = (medicine) => {
+  const addMultipleToCart = (medicine, quantity = 1) => {
+    if (medicine.stock_quantity < quantity) {
+      alert(`Insufficient stock! Only ${medicine.stock_quantity} units available.`);
+      return;
+    }
+
     const existingItem = cart.find(item => item.medicine_id === medicine.id);
     if (existingItem) {
-      if (existingItem.quantity < medicine.stock_quantity) {
+      const newQuantity = existingItem.quantity + quantity;
+      if (newQuantity <= medicine.stock_quantity) {
         setCart(cart.map(item =>
           item.medicine_id === medicine.id
-            ? { ...item, quantity: item.quantity + 1, total: (item.quantity + 1) * item.price }
+            ? { ...item, quantity: newQuantity, total: newQuantity * item.price }
             : item
         ));
+      } else {
+        alert(`Cannot add ${quantity} more. Stock limit: ${medicine.stock_quantity}, Current in cart: ${existingItem.quantity}`);
       }
     } else {
-      if (medicine.stock_quantity > 0) {
-        setCart([...cart, {
-          medicine_id: medicine.id,
-          medicine_name: medicine.name,
-          quantity: 1,
-          price: medicine.price,
-          total: medicine.price
-        }]);
-      }
+      setCart([...cart, {
+        medicine_id: medicine.id,
+        medicine_name: medicine.name,
+        quantity: quantity,
+        price: medicine.price,
+        total: medicine.price * quantity
+      }]);
     }
+  };
+
+  // POS functions
+  const addToCart = (medicine, quantity = 1) => {
+    addMultipleToCart(medicine, quantity);
   };
 
   const updateCartQuantity = (medicineId, newQuantity) => {
