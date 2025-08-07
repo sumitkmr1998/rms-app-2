@@ -369,6 +369,12 @@ async def create_or_update_shop(shop: ShopDetails):
 async def get_shop():
     shop = await db.shop_details.find_one({})
     if shop:
+        # Convert datetime strings back to datetime objects for response
+        if isinstance(shop.get('updated_at'), str):
+            try:
+                shop['updated_at'] = datetime.fromisoformat(shop['updated_at'])
+            except (ValueError, AttributeError):
+                pass
         return ShopDetails(**shop)
     return None
 
