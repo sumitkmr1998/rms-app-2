@@ -155,6 +155,13 @@ async def get_medicine(medicine_id: str):
     medicine = await db.medicines.find_one({"id": medicine_id})
     if not medicine:
         raise HTTPException(status_code=404, detail="Medicine not found")
+    
+    # Convert expiry_date string back to date object for response
+    if isinstance(medicine.get('expiry_date'), str):
+        try:
+            medicine['expiry_date'] = datetime.fromisoformat(medicine['expiry_date']).date()
+        except (ValueError, AttributeError):
+            pass
     return Medicine(**medicine)
 
 @api_router.put("/medicines/{medicine_id}", response_model=Medicine)
