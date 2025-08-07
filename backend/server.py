@@ -254,6 +254,15 @@ async def get_sales(
         query["items.medicine_name"] = {"$regex": medicine_name, "$options": "i"}
     
     sales = await db.sales.find(query).sort("sale_date", -1).limit(limit).to_list(limit)
+    
+    # Convert datetime strings back to datetime objects for response
+    for sale in sales:
+        if isinstance(sale.get('sale_date'), str):
+            try:
+                sale['sale_date'] = datetime.fromisoformat(sale['sale_date'])
+            except (ValueError, AttributeError):
+                pass
+    
     return [Sale(**sale) for sale in sales]
 
 @api_router.get("/sales/analytics")
