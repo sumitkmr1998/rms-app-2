@@ -294,19 +294,29 @@ const App = () => {
       const saleData = {
         items: cart,
         total_amount: getCartTotal(),
-        payment_method: 'cash',
+        payment_method: paymentMethod,
+        customer_name: customerName || undefined,
+        customer_phone: customerPhone || undefined,
         cashier_id: 'default-user'
       };
 
       await axios.post(`${API}/sales`, saleData);
       
-      // Clear cart and refresh data
+      // Clear cart and reset form
       setCart([]);
+      setCustomerName('');
+      setCustomerPhone('');
+      setPaymentMethod('cash');
       fetchMedicines();
       fetchSales();
       fetchAnalytics();
       
       alert('Sale completed successfully!');
+      
+      // Focus back to search for next transaction
+      setTimeout(() => {
+        searchRef.current?.focus();
+      }, 100);
     } catch (error) {
       console.error('Error processing sale:', error);
       alert('Error processing sale. Please try again.');
