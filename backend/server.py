@@ -173,12 +173,22 @@ async def update_medicine(medicine_id: str, medicine_update: MedicineCreate):
     update_dict = medicine_update.dict()
     update_dict["updated_at"] = datetime.utcnow()
     
+    # Convert date objects to strings for MongoDB
+    if isinstance(update_dict.get('expiry_date'), date):
+        update_dict['expiry_date'] = update_dict['expiry_date'].isoformat()
+    
     await db.medicines.update_one(
         {"id": medicine_id},
         {"$set": update_dict}
     )
     
     updated_medicine = await db.medicines.find_one({"id": medicine_id})
+    # Convert expiry_date string back to date object for response
+    if isinstance(updated_medicine.get('expiry_date'), str):
+        try:
+            updated_medicine['expiry_date'] = datetime.fromisoformat(updated_medicine['expiry_date']).date()
+        except (ValueError, AttributeError):
+            pass
     return Medicine(**updated_medicine)
 
 @api_router.delete("/medicines/{medicine_id}")
