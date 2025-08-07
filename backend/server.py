@@ -223,7 +223,13 @@ async def create_sale(sale: SaleCreate):
     # Create sale record
     sale_dict = sale.dict()
     sale_obj = Sale(**sale_dict, receipt_number=receipt_number)
-    await db.sales.insert_one(sale_obj.dict())
+    
+    # Convert datetime objects to serializable format for MongoDB
+    sale_data = sale_obj.dict()
+    if isinstance(sale_data.get('sale_date'), datetime):
+        sale_data['sale_date'] = sale_data['sale_date'].isoformat()
+    
+    await db.sales.insert_one(sale_data)
     
     return sale_obj
 
