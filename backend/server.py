@@ -329,6 +329,15 @@ async def create_user(user: UserCreate):
 @api_router.get("/users", response_model=List[User])
 async def get_users():
     users = await db.users.find().to_list(1000)
+    
+    # Convert datetime strings back to datetime objects for response
+    for user in users:
+        if isinstance(user.get('created_at'), str):
+            try:
+                user['created_at'] = datetime.fromisoformat(user['created_at'])
+            except (ValueError, AttributeError):
+                pass
+    
     return [User(**user) for user in users]
 
 # Shop details endpoints
