@@ -120,7 +120,13 @@ async def root():
 async def create_medicine(medicine: MedicineCreate):
     medicine_dict = medicine.dict()
     medicine_obj = Medicine(**medicine_dict)
-    await db.medicines.insert_one(medicine_obj.dict())
+    
+    # Convert date objects to strings for MongoDB
+    medicine_data = medicine_obj.dict()
+    if isinstance(medicine_data.get('expiry_date'), date):
+        medicine_data['expiry_date'] = medicine_data['expiry_date'].isoformat()
+    
+    await db.medicines.insert_one(medicine_data)
     return medicine_obj
 
 @api_router.get("/medicines", response_model=List[Medicine])
