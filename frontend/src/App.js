@@ -369,36 +369,59 @@ const App = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Product Search & Selection */}
       <div className="w-2/3 p-6">
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <input
             ref={searchRef}
             type="text"
-            placeholder="Search medicines... (Press F1 to focus)"
+            placeholder="Search medicines... (Press F1 to focus, / for quick focus, Enter to add selected)"
             className="w-full p-3 border rounded-lg text-lg"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
           />
+          {isQuickEntry && (
+            <div className="absolute top-full left-0 mt-1 bg-yellow-100 border border-yellow-300 px-3 py-1 rounded text-sm">
+              Quick Quantity: {quickQuantity} (Press + to add, Backspace to edit)
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-          {medicines.map((medicine) => (
+          {medicines.map((medicine, index) => (
             <div
               key={medicine.id}
-              className="bg-white p-4 rounded-lg shadow cursor-pointer hover:bg-blue-50 transition-colors"
+              className={`bg-white p-4 rounded-lg shadow cursor-pointer transition-colors ${
+                index === selectedMedicineIndex ? 'bg-blue-100 border-2 border-blue-500' : 'hover:bg-blue-50'
+              }`}
               onClick={() => addToCart(medicine)}
             >
               <h3 className="font-semibold text-lg">{medicine.name}</h3>
               <p className="text-gray-600">Stock: {medicine.stock_quantity}</p>
               <p className="text-green-600 font-bold">₹{medicine.price}</p>
               <p className="text-sm text-gray-500">Exp: {new Date(medicine.expiry_date).toLocaleDateString()}</p>
+              {index === selectedMedicineIndex && (
+                <div className="text-xs text-blue-600 font-medium mt-1">
+                  ↵ Enter to add • ↑↓ Navigate
+                </div>
+              )}
             </div>
           ))}
         </div>
+
+        {medicines.length === 0 && searchTerm && (
+          <div className="text-center text-gray-500 mt-8">
+            No medicines found for "{searchTerm}"
+          </div>
+        )}
       </div>
 
       {/* Cart & Checkout */}
       <div className="w-1/3 bg-white p-6 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Cart</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Cart</h2>
+          <div className="text-xs text-gray-500">
+            F3: Clear Cart
+          </div>
+        </div>
         
         <div className="max-h-64 overflow-y-auto mb-4">
           {cart.map((item, index) => (
@@ -410,7 +433,7 @@ const App = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => updateCartQuantity(item.medicine_id, item.quantity - 1)}
-                  className="bg-red-500 text-white w-6 h-6 rounded text-xs"
+                  className="bg-red-500 text-white w-6 h-6 rounded text-xs hover:bg-red-600"
                 >
                   -
                 </button>
@@ -423,7 +446,7 @@ const App = () => {
                 />
                 <button
                   onClick={() => updateCartQuantity(item.medicine_id, item.quantity + 1)}
-                  className="bg-green-500 text-white w-6 h-6 rounded text-xs"
+                  className="bg-green-500 text-white w-6 h-6 rounded text-xs hover:bg-green-600"
                 >
                   +
                 </button>
@@ -431,6 +454,44 @@ const App = () => {
               <div className="font-bold">₹{item.total.toFixed(2)}</div>
             </div>
           ))}
+        </div>
+
+        {/* Customer Information */}
+        <div className="border-t pt-4 mb-4">
+          <div className="mb-2">
+            <label className="block text-sm font-medium mb-1">Customer Name (F4)</label>
+            <input
+              ref={customerNameRef}
+              type="text"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder="Optional"
+              className="w-full p-2 border rounded text-sm"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium mb-1">Customer Phone</label>
+            <input
+              ref={customerPhoneRef}
+              type="text"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              placeholder="Optional"
+              className="w-full p-2 border rounded text-sm"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium mb-1">Payment Method (F5 to cycle)</label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-full p-2 border rounded text-sm"
+            >
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
+              <option value="upi">UPI</option>
+            </select>
+          </div>
         </div>
 
         <div className="border-t pt-4">
@@ -442,24 +503,34 @@ const App = () => {
           <button
             onClick={handleCheckout}
             disabled={cart.length === 0}
-            className="w-full bg-green-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-green-700 disabled:bg-gray-400"
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-green-700 disabled:bg-gray-400 mb-2"
           >
             Checkout (F2)
           </button>
           
           <button
             onClick={() => setCart([])}
-            className="w-full bg-red-600 text-white py-2 rounded-lg mt-2 hover:bg-red-700"
+            className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
           >
-            Clear Cart
+            Clear Cart (F3)
           </button>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600">
-          <div>Keyboard shortcuts:</div>
-          <div>F1: Focus search</div>
-          <div>F2: Checkout</div>
-          <div>Alt+P/I/S/U: Switch views</div>
+        <div className="mt-4 text-xs text-gray-600 border-t pt-4">
+          <div className="font-semibold mb-2">Power User Shortcuts:</div>
+          <div className="space-y-1">
+            <div><kbd className="bg-gray-100 px-1 rounded">F1</kbd> Focus search</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">F2</kbd> Checkout</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">F3</kbd> Clear cart</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">F4</kbd> Customer name</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">F5</kbd> Payment method</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">/</kbd> Quick search focus</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">↑↓</kbd> Navigate medicines</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">Enter</kbd> Add selected item</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">1-9</kbd> Quick quantity</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">+</kbd> Add with quantity</div>
+            <div><kbd className="bg-gray-100 px-1 rounded">Ctrl+P/I/S/U</kbd> Switch views</div>
+          </div>
         </div>
       </div>
     </div>
