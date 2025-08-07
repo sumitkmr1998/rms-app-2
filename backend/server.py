@@ -346,16 +346,22 @@ async def create_or_update_shop(shop: ShopDetails):
     # Check if shop details already exist
     existing_shop = await db.shop_details.find_one({})
     
+    # Convert datetime objects to serializable format for MongoDB
+    shop_data = shop.dict()
+    if isinstance(shop_data.get('updated_at'), datetime):
+        shop_data['updated_at'] = shop_data['updated_at'].isoformat()
+    
     if existing_shop:
         # Update existing shop details
         shop.id = existing_shop["id"]
+        shop_data["id"] = existing_shop["id"]
         await db.shop_details.update_one(
             {"id": existing_shop["id"]},
-            {"$set": shop.dict()}
+            {"$set": shop_data}
         )
     else:
         # Create new shop details
-        await db.shop_details.insert_one(shop.dict())
+        await db.shop_details.insert_one(shop_data)
     
     return shop
 
