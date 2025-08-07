@@ -339,25 +339,25 @@ const App = () => {
             onClick={() => setCurrentView('pos')}
             className={`px-4 py-2 rounded ${currentView === 'pos' ? 'bg-blue-600' : 'bg-blue-700 hover:bg-blue-600'}`}
           >
-            POS (Alt+P)
+            POS <span className="text-sm opacity-75">(Ctrl+P)</span>
           </button>
           <button
             onClick={() => setCurrentView('inventory')}
             className={`px-4 py-2 rounded ${currentView === 'inventory' ? 'bg-blue-600' : 'bg-blue-700 hover:bg-blue-600'}`}
           >
-            Inventory (Alt+I)
+            Inventory <span className="text-sm opacity-75">(Ctrl+I)</span>
           </button>
           <button
             onClick={() => setCurrentView('sales')}
             className={`px-4 py-2 rounded ${currentView === 'sales' ? 'bg-blue-600' : 'bg-blue-700 hover:bg-blue-600'}`}
           >
-            Sales (Alt+S)
+            Sales <span className="text-sm opacity-75">(Ctrl+S)</span>
           </button>
           <button
             onClick={() => setCurrentView('users')}
             className={`px-4 py-2 rounded ${currentView === 'users' ? 'bg-blue-600' : 'bg-blue-700 hover:bg-blue-600'}`}
           >
-            Users (Alt+U)
+            Users <span className="text-sm opacity-75">(Ctrl+U)</span>
           </button>
         </div>
       </div>
