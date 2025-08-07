@@ -141,6 +141,13 @@ async def get_medicines(search: Optional[str] = Query(None)):
         }
     
     medicines = await db.medicines.find(query).to_list(1000)
+    # Convert expiry_date string back to date object for response
+    for medicine in medicines:
+        if isinstance(medicine.get('expiry_date'), str):
+            try:
+                medicine['expiry_date'] = datetime.fromisoformat(medicine['expiry_date']).date()
+            except (ValueError, AttributeError):
+                pass
     return [Medicine(**medicine) for medicine in medicines]
 
 @api_router.get("/medicines/{medicine_id}", response_model=Medicine)
