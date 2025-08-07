@@ -14,10 +14,18 @@ const App = () => {
   const [analytics, setAnalytics] = useState({});
   const [users, setUsers] = useState([]);
   const [shop, setShop] = useState(null);
+  const [selectedMedicineIndex, setSelectedMedicineIndex] = useState(0);
+  const [quickQuantity, setQuickQuantity] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [isQuickEntry, setIsQuickEntry] = useState(false);
   
   // Refs for keyboard navigation
   const searchRef = useRef(null);
   const quantityRefs = useRef([]);
+  const customerNameRef = useRef(null);
+  const customerPhoneRef = useRef(null);
 
   // Fetch data on component mount
   useEffect(() => {
