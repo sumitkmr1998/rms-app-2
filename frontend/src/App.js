@@ -539,50 +539,109 @@ const App = () => {
   // Sales Analytics View
   const SalesView = () => (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Sales Analytics</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Sales Analytics</h2>
+        <div className="text-sm text-gray-600">
+          <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
+          <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">Ctrl+I</kbd> for Inventory
+        </div>
+      </div>
       
       {/* Analytics Cards */}
       <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total Sales</h3>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+          <h3 className="text-lg font-semibold mb-2 text-green-700">Total Sales</h3>
           <p className="text-3xl font-bold text-green-600">₹{analytics.total_sales || 0}</p>
+          <div className="text-sm text-gray-500 mt-1">All time revenue</div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total Transactions</h3>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+          <h3 className="text-lg font-semibold mb-2 text-blue-700">Total Transactions</h3>
           <p className="text-3xl font-bold text-blue-600">{analytics.total_transactions || 0}</p>
+          <div className="text-sm text-gray-500 mt-1">Completed sales</div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Average Transaction</h3>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+          <h3 className="text-lg font-semibold mb-2 text-purple-700">Average Transaction</h3>
           <p className="text-3xl font-bold text-purple-600">₹{analytics.avg_transaction || 0}</p>
+          <div className="text-sm text-gray-500 mt-1">Per sale average</div>
         </div>
       </div>
 
       {/* Recent Sales */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">Recent Sales</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold">Recent Sales</h3>
+          <div className="text-sm text-gray-500">
+            Latest {Math.min(sales.length, 10)} transactions
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b">
-                <th className="py-2">Receipt #</th>
-                <th className="py-2">Date</th>
-                <th className="py-2">Items</th>
-                <th className="py-2">Total</th>
-                <th className="py-2">Payment</th>
+              <tr className="border-b border-gray-200">
+                <th className="py-3 text-sm font-medium text-gray-700">Receipt #</th>
+                <th className="py-3 text-sm font-medium text-gray-700">Date</th>
+                <th className="py-3 text-sm font-medium text-gray-700">Customer</th>
+                <th className="py-3 text-sm font-medium text-gray-700">Items</th>
+                <th className="py-3 text-sm font-medium text-gray-700">Total</th>
+                <th className="py-3 text-sm font-medium text-gray-700">Payment</th>
               </tr>
             </thead>
             <tbody>
-              {sales.slice(0, 10).map((sale) => (
-                <tr key={sale.id} className="border-b">
-                  <td className="py-2">{sale.receipt_number}</td>
-                  <td className="py-2">{new Date(sale.sale_date).toLocaleDateString()}</td>
-                  <td className="py-2">{sale.items.length} items</td>
-                  <td className="py-2">₹{sale.total_amount.toFixed(2)}</td>
-                  <td className="py-2 capitalize">{sale.payment_method}</td>
+              {sales.slice(0, 10).map((sale, index) => (
+                <tr key={sale.id} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="py-3 text-sm font-mono">{sale.receipt_number}</td>
+                  <td className="py-3 text-sm">{new Date(sale.sale_date).toLocaleDateString()}</td>
+                  <td className="py-3 text-sm">{sale.customer_name || 'Walk-in'}</td>
+                  <td className="py-3 text-sm">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                      {sale.items.length} items
+                    </span>
+                  </td>
+                  <td className="py-3 text-sm font-semibold text-green-600">₹{sale.total_amount.toFixed(2)}</td>
+                  <td className="py-3 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      sale.payment_method === 'cash' ? 'bg-green-100 text-green-800' :
+                      sale.payment_method === 'card' ? 'bg-blue-100 text-blue-800' :
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      {sale.payment_method.toUpperCase()}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          
+          {sales.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No sales data available. Start making sales in the POS!
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-6 bg-white p-4 rounded-lg shadow">
+        <h4 className="font-semibold mb-2">Quick Actions</h4>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setCurrentView('pos')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+          >
+            🛒 Go to POS (Ctrl+P)
+          </button>
+          <button
+            onClick={() => setCurrentView('inventory')}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+          >
+            📦 View Inventory (Ctrl+I)
+          </button>
+          <button
+            onClick={() => {fetchSales(); fetchAnalytics();}}
+            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm"
+          >
+            🔄 Refresh Data
+          </button>
         </div>
       </div>
     </div>
