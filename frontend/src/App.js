@@ -1392,6 +1392,109 @@ const MainApp = () => {
     setShowEditUser(true);
   };
 
+  // Medicine Management Functions
+  const resetMedicineForm = () => {
+    setMedicineForm({
+      name: '',
+      price: '',
+      stock_quantity: '',
+      expiry_date: '',
+      batch_number: '',
+      supplier: '',
+      barcode: ''
+    });
+  };
+
+  const handleAddMedicine = async (e) => {
+    e.preventDefault();
+    setMedicineLoading(true);
+    setMedicineMessage('');
+
+    try {
+      const medicineData = {
+        name: medicineForm.name,
+        price: parseFloat(medicineForm.price),
+        stock_quantity: parseInt(medicineForm.stock_quantity),
+        expiry_date: medicineForm.expiry_date,
+        batch_number: medicineForm.batch_number,
+        supplier: medicineForm.supplier,
+        barcode: medicineForm.barcode || null
+      };
+
+      await axios.post(`${API}/medicines`, medicineData);
+      setShowAddMedicine(false);
+      resetMedicineForm();
+      fetchMedicines();
+      setMedicineMessage('Medicine added successfully');
+    } catch (error) {
+      setMedicineMessage(error.response?.data?.detail || 'Error adding medicine');
+    }
+    setMedicineLoading(false);
+  };
+
+  const handleEditMedicine = async (e) => {
+    e.preventDefault();
+    setMedicineLoading(true);
+    setMedicineMessage('');
+
+    try {
+      const medicineData = {
+        name: medicineForm.name,
+        price: parseFloat(medicineForm.price),
+        stock_quantity: parseInt(medicineForm.stock_quantity),
+        expiry_date: medicineForm.expiry_date,
+        batch_number: medicineForm.batch_number,
+        supplier: medicineForm.supplier,
+        barcode: medicineForm.barcode || null
+      };
+
+      await axios.put(`${API}/medicines/${selectedMedicine.id}`, medicineData);
+      setShowEditMedicine(false);
+      setSelectedMedicine(null);
+      resetMedicineForm();
+      fetchMedicines();
+      setMedicineMessage('Medicine updated successfully');
+    } catch (error) {
+      setMedicineMessage(error.response?.data?.detail || 'Error updating medicine');
+    }
+    setMedicineLoading(false);
+  };
+
+  const handleDeleteMedicine = async (medicineId, medicineName) => {
+    if (!confirm(`Are you sure you want to delete "${medicineName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setMedicineLoading(true);
+    try {
+      await axios.delete(`${API}/medicines/${medicineId}`);
+      fetchMedicines();
+      setMedicineMessage('Medicine deleted successfully');
+    } catch (error) {
+      setMedicineMessage(error.response?.data?.detail || 'Error deleting medicine');
+    }
+    setMedicineLoading(false);
+  };
+
+  const openEditMedicine = (medicine) => {
+    setSelectedMedicine(medicine);
+    setMedicineForm({
+      name: medicine.name,
+      price: medicine.price.toString(),
+      stock_quantity: medicine.stock_quantity.toString(),
+      expiry_date: new Date(medicine.expiry_date).toISOString().split('T')[0],
+      batch_number: medicine.batch_number,
+      supplier: medicine.supplier,
+      barcode: medicine.barcode || ''
+    });
+    setShowEditMedicine(true);
+  };
+
+  // Check user permissions for medicines
+  const canModifyInventory = () => {
+    return ['admin', 'manager'].includes(user?.role);
+  };
+
   // Users View with Advanced Management
   const UsersView = () => (
     <div className="p-6">
