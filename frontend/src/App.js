@@ -1113,16 +1113,40 @@ const MainApp = () => {
     </div>
   );
 
-  // Inventory View
+  // Inventory View with Management Features
   const InventoryView = () => (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Medicine Inventory</h2>
-        <div className="text-sm text-gray-600">
-          <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
-          <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">/</kbd> to search
+        <div className="flex items-center space-x-4">
+          {canModifyInventory() && (
+            <button
+              onClick={() => {
+                resetMedicineForm();
+                setShowAddMedicine(true);
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+            >
+              Add New Medicine
+            </button>
+          )}
+          <div className="text-sm text-gray-600">
+            <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
+            <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">/</kbd> to search
+          </div>
         </div>
       </div>
+
+      {/* Message Display */}
+      {medicineMessage && (
+        <div className={`mb-4 p-4 rounded-lg border ${
+          medicineMessage.includes('successfully') 
+            ? 'bg-green-50 border-green-200 text-green-800'
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          {medicineMessage}
+        </div>
+      )}
       
       <div className="mb-4">
         <input
@@ -1135,55 +1159,326 @@ const MainApp = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {medicines.map((medicine, index) => (
-              <tr key={medicine.id} className={index === selectedMedicineIndex && currentView === 'inventory' ? 'bg-blue-50' : ''}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {medicine.name}
-                </td>
-                <td className={`px-6 py-4 whitespace-nowrap text-sm ${medicine.stock_quantity < 10 ? 'text-red-600 font-bold' : 'text-gray-900'}`}>
-                  {medicine.stock_quantity}
-                  {medicine.stock_quantity < 10 && <span className="ml-1 text-xs">⚠️ Low Stock</span>}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{medicine.price}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(medicine.expiry_date).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {medicine.supplier}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {medicine.batch_number}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {canAccessView('pos') && (
-                    <button
-                      onClick={() => addToCart(medicine)}
-                      className="text-blue-600 hover:text-blue-900 text-sm font-medium"
-                    >
-                      Add to Cart
-                    </button>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {medicines.map((medicine, index) => (
+                <tr key={medicine.id} className={index === selectedMedicineIndex && currentView === 'inventory' ? 'bg-blue-50' : ''}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{medicine.name}</div>
+                    {medicine.barcode && (
+                      <div className="text-xs text-gray-500">Barcode: {medicine.barcode}</div>
+                    )}
+                  </td>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${medicine.stock_quantity < 10 ? 'text-red-600 font-bold' : 'text-gray-900'}`}>
+                    <div className="flex items-center">
+                      {medicine.stock_quantity}
+                      {medicine.stock_quantity < 10 && <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Low Stock</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                    ₹{medicine.price}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>{new Date(medicine.expiry_date).toLocaleDateString()}</div>
+                    {new Date(medicine.expiry_date) < new Date(Date.now() + 30*24*60*60*1000) && (
+                      <span className="text-xs text-orange-600 font-medium">Expires Soon</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {medicine.supplier}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {medicine.batch_number}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex space-x-2">
+                      {canAccessView('pos') && (
+                        <button
+                          onClick={() => addToCart(medicine)}
+                          className="text-green-600 hover:text-green-900 text-sm font-medium"
+                        >
+                          Add to Cart
+                        </button>
+                      )}
+                      {canModifyInventory() && (
+                        <>
+                          <button
+                            onClick={() => openEditMedicine(medicine)}
+                            className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMedicine(medicine.id, medicine.name)}
+                            className="text-red-600 hover:text-red-900 text-sm font-medium"
+                            disabled={medicineLoading}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Add Medicine Modal */}
+      {showAddMedicine && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-screen overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add New Medicine</h3>
+                <button 
+                  onClick={() => setShowAddMedicine(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleAddMedicine} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Medicine Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.name}
+                      onChange={(e) => setMedicineForm({...medicineForm, name: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter medicine name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={medicineForm.price}
+                      onChange={(e) => setMedicineForm({...medicineForm, price: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity *</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={medicineForm.stock_quantity}
+                      onChange={(e) => setMedicineForm({...medicineForm, stock_quantity: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={medicineForm.expiry_date}
+                      onChange={(e) => setMedicineForm({...medicineForm, expiry_date: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Batch Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.batch_number}
+                      onChange={(e) => setMedicineForm({...medicineForm, batch_number: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter batch number"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.supplier}
+                      onChange={(e) => setMedicineForm({...medicineForm, supplier: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter supplier name"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Barcode (Optional)</label>
+                    <input
+                      type="text"
+                      value={medicineForm.barcode}
+                      onChange={(e) => setMedicineForm({...medicineForm, barcode: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter barcode"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMedicine(false)}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={medicineLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {medicineLoading ? 'Adding...' : 'Add Medicine'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Medicine Modal */}
+      {showEditMedicine && selectedMedicine && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-screen overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit Medicine: {selectedMedicine.name}</h3>
+                <button 
+                  onClick={() => {setShowEditMedicine(false); setSelectedMedicine(null);}}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleEditMedicine} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Medicine Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.name}
+                      onChange={(e) => setMedicineForm({...medicineForm, name: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={medicineForm.price}
+                      onChange={(e) => setMedicineForm({...medicineForm, price: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity *</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={medicineForm.stock_quantity}
+                      onChange={(e) => setMedicineForm({...medicineForm, stock_quantity: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={medicineForm.expiry_date}
+                      onChange={(e) => setMedicineForm({...medicineForm, expiry_date: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Batch Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.batch_number}
+                      onChange={(e) => setMedicineForm({...medicineForm, batch_number: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier *</label>
+                    <input
+                      type="text"
+                      required
+                      value={medicineForm.supplier}
+                      onChange={(e) => setMedicineForm({...medicineForm, supplier: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Barcode (Optional)</label>
+                    <input
+                      type="text"
+                      value={medicineForm.barcode}
+                      onChange={(e) => setMedicineForm({...medicineForm, barcode: e.target.value})}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => {setShowEditMedicine(false); setSelectedMedicine(null);}}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={medicineLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {medicineLoading ? 'Updating...' : 'Update Medicine'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 bg-white p-4 rounded-lg shadow">
         <h3 className="font-semibold mb-2">Inventory Summary</h3>
@@ -1212,6 +1507,38 @@ const MainApp = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Actions */}
+      {canModifyInventory() && (
+        <div className="mt-6 bg-white p-4 rounded-lg shadow">
+          <h4 className="font-semibold mb-2">Quick Actions</h4>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => {
+                resetMedicineForm();
+                setShowAddMedicine(true);
+              }}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+            >
+              📦 Add New Medicine
+            </button>
+            <button
+              onClick={() => fetchMedicines()}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+            >
+              🔄 Refresh Inventory
+            </button>
+            {canAccessView('pos') && (
+              <button
+                onClick={() => setCurrentView('pos')}
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm"
+              >
+                🛒 Go to POS
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 
