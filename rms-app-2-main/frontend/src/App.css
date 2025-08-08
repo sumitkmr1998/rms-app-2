@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the Medicine POS system */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* POS-specific styles */
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.medicine-card {
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+}
+
+.medicine-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.medicine-card:active {
+  transform: translateY(0);
+}
+
+/* Cart styles */
+.cart-item {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.cart-item:hover {
+  background-color: #f8fafc;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors;
+}
+
+/* Table styles */
+.table-auto {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-auto th,
+.table-auto td {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-auto th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Low stock indicator */
+.low-stock {
+  @apply text-red-600 font-bold;
+}
+
+.low-stock::after {
+  content: " ⚠️";
+}
+
+/* Keyboard shortcut indicators */
+.shortcut-hint {
+  @apply text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Loading states */
+.loading {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+/* Success/Error message styles */
+.alert {
+  @apply px-4 py-3 rounded-lg border;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-200 text-green-800;
+}
+
+.alert-error {
+  @apply bg-red-50 border-red-200 text-red-800;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+/* Focus states for accessibility */
+input:focus,
+button:focus,
+select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles for receipts */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-section,
+  .print-section * {
+    visibility: visible;
+  }
+  
+  .print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Animation for cart additions */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cart-animation {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Status indicators */
+.status-active {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-inactive {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-pending {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Typography */
+.heading-primary {
+  @apply text-3xl font-bold text-gray-900 mb-6;
+}
+
+.heading-secondary {
+  @apply text-2xl font-semibold text-gray-800 mb-4;
+}
+
+.text-muted {
+  @apply text-gray-600;
+}
+
+/* Spacing utilities */
+.section-padding {
+  @apply px-6 py-8;
+}
+
+.card-padding {
+  @apply p-6;
+}
+
+/* Border utilities */
+.border-light {
+  @apply border-gray-200;
+}
+
+.border-strong {
+  @apply border-gray-400;
+}
+
+/* Background patterns */
+.bg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.4'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
