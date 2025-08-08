@@ -1176,16 +1176,240 @@ const MainApp = () => {
     </div>
   );
 
-  // Users View
+  // Advanced User Management State
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userForm, setUserForm] = useState({
+    username: '',
+    email: '',
+    full_name: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    role: 'cashier',
+    permissions: {}
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_new_password: ''
+  });
+  const [userManagementLoading, setUserManagementLoading] = useState(false);
+  const [userMessage, setUserMessage] = useState('');
+
+  // User Management Functions
+  const resetUserForm = () => {
+    setUserForm({
+      username: '',
+      email: '',
+      full_name: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      role: 'cashier',
+      permissions: {}
+    });
+  };
+
+  const resetPasswordForm = () => {
+    setPasswordForm({
+      current_password: '',
+      new_password: '',
+      confirm_new_password: ''
+    });
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setUserManagementLoading(true);
+    setUserMessage('');
+
+    if (userForm.password !== userForm.confirmPassword) {
+      setUserMessage('Passwords do not match');
+      setUserManagementLoading(false);
+      return;
+    }
+
+    try {
+      const userData = {
+        username: userForm.username,
+        email: userForm.email || null,
+        full_name: userForm.full_name || null,
+        phone: userForm.phone || null,
+        password: userForm.password,
+        role: userForm.role,
+        permissions: getDefaultPermissions(userForm.role)
+      };
+
+      await axios.post(`${API}/users`, userData);
+      setShowCreateUser(false);
+      resetUserForm();
+      fetchUsers();
+      setUserMessage('User created successfully');
+    } catch (error) {
+      setUserMessage(error.response?.data?.detail || 'Error creating user');
+    }
+    setUserManagementLoading(false);
+  };
+
+  const handleEditUser = async (e) => {
+    e.preventDefault();
+    setUserManagementLoading(true);
+    setUserMessage('');
+
+    try {
+      const updateData = {
+        username: userForm.username,
+        email: userForm.email || null,
+        full_name: userForm.full_name || null,
+        phone: userForm.phone || null,
+        role: userForm.role,
+        permissions: getDefaultPermissions(userForm.role),
+        is_active: selectedUser.is_active
+      };
+
+      await axios.put(`${API}/users/${selectedUser.id}`, updateData);
+      setShowEditUser(false);
+      setSelectedUser(null);
+      resetUserForm();
+      fetchUsers();
+      setUserMessage('User updated successfully');
+    } catch (error) {
+      setUserMessage(error.response?.data?.detail || 'Error updating user');
+    }
+    setUserManagementLoading(false);
+  };
+
+  const handleToggleUserStatus = async (userId, currentStatus) => {
+    setUserManagementLoading(true);
+    try {
+      await axios.put(`${API}/users/${userId}`, {
+        is_active: !currentStatus
+      });
+      fetchUsers();
+      setUserMessage(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      setUserMessage(error.response?.data?.detail || 'Error updating user status');
+    }
+    setUserManagementLoading(false);
+  };
+
+  const handleDeleteUser = async (userId, username) => {
+    if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setUserManagementLoading(true);
+    try {
+      await axios.delete(`${API}/users/${userId}`);
+      fetchUsers();
+      setUserMessage('User deleted successfully');
+    } catch (error) {
+      setUserMessage(error.response?.data?.detail || 'Error deleting user');
+    }
+    setUserManagementLoading(false);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setUserManagementLoading(true);
+    setUserMessage('');
+
+    if (passwordForm.new_password !== passwordForm.confirm_new_password) {
+      setUserMessage('New passwords do not match');
+      setUserManagementLoading(false);
+      return;
+    }
+
+    try {
+      await axios.put(`${API}/auth/change-password`, {
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password
+      });
+      setShowChangePassword(false);
+      resetPasswordForm();
+      setUserMessage('Password changed successfully');
+    } catch (error) {
+      setUserMessage(error.response?.data?.detail || 'Error changing password');
+    }
+    setUserManagementLoading(false);
+  };
+
+  const getDefaultPermissions = (role) => {
+    switch (role) {
+      case 'admin':
+        return {
+          can_manage_users: true,
+          can_modify_stock: true,
+          can_view_reports: true,
+          can_manage_system: true
+        };
+      case 'manager':
+        return {
+          can_modify_stock: true,
+          can_view_reports: true,
+          can_manage_customers: true
+        };
+      case 'cashier':
+        return {
+          can_process_sales: true
+        };
+      default:
+        return {};
+    }
+  };
+
+  const openEditUser = (userToEdit) => {
+    setSelectedUser(userToEdit);
+    setUserForm({
+      username: userToEdit.username,
+      email: userToEdit.email || '',
+      full_name: userToEdit.full_name || '',
+      phone: userToEdit.phone || '',
+      password: '',
+      confirmPassword: '',
+      role: userToEdit.role,
+      permissions: userToEdit.permissions || {}
+    });
+    setShowEditUser(true);
+  };
+
+  // Users View with Advanced Management
   const UsersView = () => (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">User Management</h2>
-        <div className="text-sm text-gray-600">
-          <kbd className="bg-gray-100 px-2 py-1 rounded">Ctrl+P</kbd> for POS • 
-          <kbd className="bg-gray-100 px-2 py-1 rounded ml-1">Ctrl+S</kbd> for Sales
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => {
+              resetUserForm();
+              setShowCreateUser(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+          >
+            Create New User
+          </button>
+          <button
+            onClick={() => setShowChangePassword(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium"
+          >
+            Change My Password
+          </button>
         </div>
       </div>
+
+      {/* Message Display */}
+      {userMessage && (
+        <div className={`mb-4 p-4 rounded-lg border ${
+          userMessage.includes('successfully') 
+            ? 'bg-green-50 border-green-200 text-green-800'
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          {userMessage}
+        </div>
+      )}
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-4 bg-gray-50 border-b">
@@ -1193,59 +1417,383 @@ const MainApp = () => {
           <p className="text-sm text-gray-600 mt-1">Manage user access and roles for the pharmacy system</p>
         </div>
         
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((userItem, index) => (
-              <tr key={userItem.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <div className="flex items-center">
-                    <div className={`w-3 h-3 rounded-full mr-3 ${
-                      userItem.role === 'admin' ? 'bg-red-500' :
-                      userItem.role === 'manager' ? 'bg-blue-500' : 'bg-green-500'
-                    }`}></div>
-                    {userItem.username}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {userItem.full_name || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                    userItem.role === 'admin' ? 'bg-red-100 text-red-800' :
-                    userItem.role === 'manager' ? 'bg-blue-100 text-blue-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {userItem.role.charAt(0).toUpperCase() + userItem.role.slice(1)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    userItem.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {userItem.is_active ? '✓ Active' : '✗ Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {userItem.last_login ? new Date(userItem.last_login).toLocaleDateString() : 'Never'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(userItem.created_at).toLocaleDateString()}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {users.map((userItem, index) => (
+                <tr key={userItem.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className={`w-3 h-3 rounded-full mr-3 ${
+                        userItem.role === 'admin' ? 'bg-red-500' :
+                        userItem.role === 'manager' ? 'bg-blue-500' : 'bg-green-500'
+                      }`}></div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{userItem.username}</div>
+                        <div className="text-sm text-gray-500">{userItem.full_name || 'No name set'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>
+                      {userItem.email && <div className="text-gray-900">{userItem.email}</div>}
+                      {userItem.phone && <div className="text-gray-500">{userItem.phone}</div>}
+                      {!userItem.email && !userItem.phone && <span className="text-gray-400">No contact info</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                      userItem.role === 'admin' ? 'bg-red-100 text-red-800' :
+                      userItem.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {userItem.role.charAt(0).toUpperCase() + userItem.role.slice(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      userItem.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {userItem.is_active ? '✓ Active' : '✗ Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {userItem.last_login ? new Date(userItem.last_login).toLocaleDateString() : 'Never'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => openEditUser(userItem)}
+                        className="text-blue-600 hover:text-blue-900 font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleToggleUserStatus(userItem.id, userItem.is_active)}
+                        className={`font-medium ${
+                          userItem.is_active 
+                            ? 'text-red-600 hover:text-red-900' 
+                            : 'text-green-600 hover:text-green-900'
+                        }`}
+                        disabled={userManagementLoading}
+                      >
+                        {userItem.is_active ? 'Deactivate' : 'Activate'}
+                      </button>
+                      {userItem.id !== user?.id && (
+                        <button
+                          onClick={() => handleDeleteUser(userItem.id, userItem.username)}
+                          className="text-red-600 hover:text-red-900 font-medium"
+                          disabled={userManagementLoading}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Create User Modal */}
+      {showCreateUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Create New User</h3>
+                <button 
+                  onClick={() => setShowCreateUser(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+                  <input
+                    type="text"
+                    required
+                    value={userForm.username}
+                    onChange={(e) => setUserForm({...userForm, username: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={userForm.full_name}
+                    onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={userForm.email}
+                    onChange={(e) => setUserForm({...userForm, email: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter email address"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={userForm.phone}
+                    onChange={(e) => setUserForm({...userForm, phone: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                  <select
+                    required
+                    value={userForm.role}
+                    onChange={(e) => setUserForm({...userForm, role: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="cashier">Cashier</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={userForm.password}
+                    onChange={(e) => setUserForm({...userForm, password: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={userForm.confirmPassword}
+                    onChange={(e) => setUserForm({...userForm, confirmPassword: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Confirm password"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateUser(false)}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={userManagementLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {userManagementLoading ? 'Creating...' : 'Create User'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditUser && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit User: {selectedUser.username}</h3>
+                <button 
+                  onClick={() => {setShowEditUser(false); setSelectedUser(null);}}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleEditUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+                  <input
+                    type="text"
+                    required
+                    value={userForm.username}
+                    onChange={(e) => setUserForm({...userForm, username: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={userForm.full_name}
+                    onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={userForm.email}
+                    onChange={(e) => setUserForm({...userForm, email: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={userForm.phone}
+                    onChange={(e) => setUserForm({...userForm, phone: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                  <select
+                    required
+                    value={userForm.role}
+                    onChange={(e) => setUserForm({...userForm, role: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="cashier">Cashier</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => {setShowEditUser(false); setSelectedUser(null);}}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={userManagementLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {userManagementLoading ? 'Updating...' : 'Update User'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Change Password</h3>
+                <button 
+                  onClick={() => setShowChangePassword(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.current_password}
+                    onChange={(e) => setPasswordForm({...passwordForm, current_password: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter current password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.new_password}
+                    onChange={(e) => setPasswordForm({...passwordForm, new_password: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.confirm_new_password}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirm_new_password: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowChangePassword(false)}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={userManagementLoading}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {userManagementLoading ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* User Role Descriptions */}
       <div className="mt-6 grid grid-cols-3 gap-4">
