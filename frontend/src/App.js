@@ -1846,7 +1846,7 @@ const MainApp = () => {
     return ['admin', 'manager'].includes(user?.role);
   };
 
-  // Users View with Advanced Management
+  // Enhanced Users View with Advanced Management
   const UsersView = () => (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -1870,6 +1870,32 @@ const MainApp = () => {
         </div>
       </div>
 
+      {/* User Statistics */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="text-2xl font-bold text-blue-600">{users.length}</div>
+          <div className="text-sm text-gray-600">Total Users</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="text-2xl font-bold text-red-600">
+            {users.filter(u => u.role === 'admin').length}
+          </div>
+          <div className="text-sm text-gray-600">Admins</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="text-2xl font-bold text-blue-600">
+            {users.filter(u => u.role === 'manager').length}
+          </div>
+          <div className="text-sm text-gray-600">Managers</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="text-2xl font-bold text-green-600">
+            {users.filter(u => u.role === 'cashier').length}
+          </div>
+          <div className="text-sm text-gray-600">Cashiers</div>
+        </div>
+      </div>
+
       {/* Message Display */}
       {userMessage && (
         <div className={`mb-4 p-4 rounded-lg border ${
@@ -1877,9 +1903,33 @@ const MainApp = () => {
             ? 'bg-green-50 border-green-200 text-green-800'
             : 'bg-red-50 border-red-200 text-red-800'
         }`}>
-          {userMessage}
+          <div className="flex justify-between items-center">
+            <span>{userMessage}</span>
+            <button 
+              onClick={() => setUserMessage('')}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Search and Filter */}
+      <div className="mb-4">
+        <div className="flex justify-between items-center">
+          <input
+            type="text"
+            placeholder="Search users by name, username, email, or role..."
+            className="w-full max-w-lg p-3 border rounded-lg"
+            value={userSearchTerm}
+            onChange={(e) => handleUserSearch(e.target.value)}
+          />
+          <div className="text-sm text-gray-600 ml-4">
+            Showing {filteredUsers.length} of {users.length} users
+          </div>
+        </div>
+      </div>
       
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-4 bg-gray-50 border-b">
@@ -1900,78 +1950,88 @@ const MainApp = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((userItem, index) => (
-                <tr key={userItem.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className={`w-3 h-3 rounded-full mr-3 ${
-                        userItem.role === 'admin' ? 'bg-red-500' :
-                        userItem.role === 'manager' ? 'bg-blue-500' : 'bg-green-500'
-                      }`}></div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{userItem.username}</div>
-                        <div className="text-sm text-gray-500">{userItem.full_name || 'No name set'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>
-                      {userItem.email && <div className="text-gray-900">{userItem.email}</div>}
-                      {userItem.phone && <div className="text-gray-500">{userItem.phone}</div>}
-                      {!userItem.email && !userItem.phone && <span className="text-gray-400">No contact info</span>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      userItem.role === 'admin' ? 'bg-red-100 text-red-800' :
-                      userItem.role === 'manager' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {userItem.role.charAt(0).toUpperCase() + userItem.role.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      userItem.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {userItem.is_active ? '✓ Active' : '✗ Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {userItem.last_login ? new Date(userItem.last_login).toLocaleDateString() : 'Never'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => openEditUser(userItem)}
-                        className="text-blue-600 hover:text-blue-900 font-medium"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleToggleUserStatus(userItem.id, userItem.is_active)}
-                        className={`font-medium ${
-                          userItem.is_active 
-                            ? 'text-red-600 hover:text-red-900' 
-                            : 'text-green-600 hover:text-green-900'
-                        }`}
-                        disabled={userManagementLoading}
-                      >
-                        {userItem.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      {userItem.id !== user?.id && (
-                        <button
-                          onClick={() => handleDeleteUser(userItem.id, userItem.username)}
-                          className="text-red-600 hover:text-red-900 font-medium"
-                          disabled={userManagementLoading}
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
+              {filteredUsers.length === 0 && userSearchTerm ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                    No users found matching "{userSearchTerm}"
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredUsers.map((userItem, index) => (
+                  <tr key={userItem.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className={`w-3 h-3 rounded-full mr-3 ${
+                          userItem.role === 'admin' ? 'bg-red-500' :
+                          userItem.role === 'manager' ? 'bg-blue-500' : 'bg-green-500'
+                        }`}></div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{userItem.username}</div>
+                          <div className="text-sm text-gray-500">{userItem.full_name || 'No name set'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div>
+                        {userItem.email && <div className="text-gray-900">{userItem.email}</div>}
+                        {userItem.phone && <div className="text-gray-500">{userItem.phone}</div>}
+                        {!userItem.email && !userItem.phone && <span className="text-gray-400">No contact info</span>}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        userItem.role === 'admin' ? 'bg-red-100 text-red-800' :
+                        userItem.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {userItem.role.charAt(0).toUpperCase() + userItem.role.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        userItem.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {userItem.is_active ? '✓ Active' : '✗ Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {userItem.last_login ? new Date(userItem.last_login).toLocaleDateString() : (
+                        <span className="text-gray-400">Never</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => openEditUser(userItem)}
+                          className="text-blue-600 hover:text-blue-900 font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleToggleUserStatus(userItem.id, userItem.is_active)}
+                          className={`font-medium ${
+                            userItem.is_active 
+                              ? 'text-red-600 hover:text-red-900' 
+                              : 'text-green-600 hover:text-green-900'
+                          }`}
+                          disabled={userManagementLoading}
+                        >
+                          {userItem.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        {userItem.id !== user?.id && (
+                          <button
+                            onClick={() => handleDeleteUser(userItem.id, userItem.username)}
+                            className="text-red-600 hover:text-red-900 font-medium"
+                            disabled={userManagementLoading}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
