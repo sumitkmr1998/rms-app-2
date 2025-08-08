@@ -422,6 +422,22 @@ const MainApp = () => {
   const [userManagementLoading, setUserManagementLoading] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   
+  // Medicine Management State
+  const [showAddMedicine, setShowAddMedicine] = useState(false);
+  const [showEditMedicine, setShowEditMedicine] = useState(false);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [medicineForm, setMedicineForm] = useState({
+    name: '',
+    price: '',
+    stock_quantity: '',
+    expiry_date: '',
+    batch_number: '',
+    supplier: '',
+    barcode: ''
+  });
+  const [medicineLoading, setMedicineLoading] = useState(false);
+  const [medicineMessage, setMedicineMessage] = useState('');
+  
   const { user, logout } = useAuth();
   
   // Refs for keyboard navigation
