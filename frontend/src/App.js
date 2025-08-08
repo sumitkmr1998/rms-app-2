@@ -421,6 +421,8 @@ const MainApp = () => {
   });
   const [userManagementLoading, setUserManagementLoading] = useState(false);
   const [userMessage, setUserMessage] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
   
   // Medicine Management State
   const [showAddMedicine, setShowAddMedicine] = useState(false);
