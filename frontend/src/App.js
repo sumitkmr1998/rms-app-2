@@ -399,6 +399,29 @@ const MainApp = () => {
   const [customerPhone, setCustomerPhone] = useState('');
   const [isQuickEntry, setIsQuickEntry] = useState(false);
   
+  // Advanced User Management State
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userForm, setUserForm] = useState({
+    username: '',
+    email: '',
+    full_name: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    role: 'cashier',
+    permissions: {}
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_new_password: ''
+  });
+  const [userManagementLoading, setUserManagementLoading] = useState(false);
+  const [userMessage, setUserMessage] = useState('');
+  
   const { user, logout } = useAuth();
   
   // Refs for keyboard navigation
