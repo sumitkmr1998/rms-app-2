@@ -670,10 +670,32 @@ const MainApp = () => {
     try {
       const response = await axios.get(`${API}/users`);
       setUsers(response.data);
+      setFilteredUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
+
+  // Filter users based on search term
+  const handleUserSearch = (term) => {
+    setUserSearchTerm(term);
+    if (!term) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user => 
+        user.username.toLowerCase().includes(term.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(term.toLowerCase()) ||
+        user.email?.toLowerCase().includes(term.toLowerCase()) ||
+        user.role.toLowerCase().includes(term.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  };
+
+  // Update filtered users when users array changes
+  useEffect(() => {
+    handleUserSearch(userSearchTerm);
+  }, [users]);
 
   const fetchShop = async () => {
     try {
