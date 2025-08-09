@@ -69,6 +69,11 @@ const RMSApp = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
+  // Printing State
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [printSale, setPrintSale] = useState(null);
+  const [printService] = useState(new PrintService());
+  
   // Medicine Management State
   const [showAddMedicine, setShowAddMedicine] = useState(false);
   const [showEditMedicine, setShowEditMedicine] = useState(false);
