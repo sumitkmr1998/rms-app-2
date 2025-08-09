@@ -9,6 +9,9 @@ import InventoryManagement from './components/InventoryManagement';
 import SalesManagement from './components/SalesManagement';
 import ShopSettings from './components/ShopSettings';
 import TallyImport from './components/TallyImport';
+import PrinterSettings from './components/PrinterSettings';
+import Invoice from './components/Invoice';
+import PrintService from './components/PrintService';
 import { Toaster } from './components/ui/toaster';
 
 // Main RMS App Component
