@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 import uuid
 import time
 
-# Backend URL - using localhost since public URL routing has issues
-BACKEND_URL = "http://localhost:8001/api"
+# Backend URL - using public URL for testing
+BACKEND_URL = "https://5114ba71-25d8-4b29-b4a0-148252d36858.preview.emergentagent.com/api"
 
 class MediPOSBackendTester:
     def __init__(self):
