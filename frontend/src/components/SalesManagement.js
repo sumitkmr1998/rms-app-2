@@ -744,6 +744,18 @@ const SalesManagement = () => {
                     </span>
                   </div>
                 </div>
+                
+                {/* Print Button */}
+                <div className="flex justify-end pt-4 border-t">
+                  <Button
+                    onClick={() => handlePrintSale(selectedSale)}
+                    disabled={printLoading}
+                    className="flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    {printLoading ? 'Printing...' : 'Print Invoice'}
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>
