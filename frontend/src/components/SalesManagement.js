@@ -613,6 +613,16 @@ const SalesManagement = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePrintSale(sale)}
+                            disabled={printLoading}
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            title="Print Invoice"
+                          >
+                            <Printer className="w-4 h-4" />
+                          </Button>
                           {canEditSales() && (
                             <>
                               <Button
