@@ -48,7 +48,8 @@ const SalesManagement = () => {
     getSaleById,
     updateSale,
     deleteSale,
-    getMedicines
+    getMedicines,
+    getShop
   } = useOfflineAuth();
 
   useEffect(() => {
