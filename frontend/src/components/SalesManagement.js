@@ -37,6 +37,10 @@ const SalesManagement = () => {
     payment_method: 'cash',
     items: []
   });
+  
+  // Print Service
+  const [printService] = useState(new PrintService());
+  const [printLoading, setPrintLoading] = useState(false);
 
   const { 
     user, 
