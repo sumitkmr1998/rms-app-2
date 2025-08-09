@@ -156,6 +156,7 @@ const RMSApp = () => {
       case 'inventory':
       case 'analytics': // Analytics access for admin and manager
       case 'backup': // Add backup access to admin and manager
+      case 'printer': // Printer settings for admin and manager
         return ['admin', 'manager'].includes(userRole);
       case 'pos':
       case 'sales':
