@@ -8,7 +8,7 @@ import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Separator } from './ui/separator';
-import { ShoppingCart, DollarSign, TrendingUp, Calendar, Eye, Edit, Trash2, Download, Filter, Search, RefreshCw, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ShoppingCart, DollarSign, TrendingUp, Calendar, Eye, Edit, Trash2, Download, Filter, Search, RefreshCw, ArrowUpRight, ArrowDownRight, Printer } from 'lucide-react';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { useOfflineAuth } from '../contexts/OfflineAuthContext';
 
