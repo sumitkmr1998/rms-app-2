@@ -11,6 +11,7 @@ import { Separator } from './ui/separator';
 import { ShoppingCart, DollarSign, TrendingUp, Calendar, Eye, Edit, Trash2, Download, Filter, Search, RefreshCw, ArrowUpRight, ArrowDownRight, Printer } from 'lucide-react';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 import { useOfflineAuth } from '../contexts/OfflineAuthContext';
+import PrintService from './PrintService';
 
 const SalesManagement = () => {
   const [sales, setSales] = useState([]);
