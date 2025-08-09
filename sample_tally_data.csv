@@ -1,0 +1,11 @@
+Medicine Name,Price,Stock Quantity,Supplier,Batch Number,Expiry Date,Barcode,Category
+Paracetamol 500mg,25.50,100,Cipla Ltd,B001,2025-12-31,1234567890123,Pain Relief
+Amoxicillin 250mg,45.75,50,Sun Pharma,B002,2026-03-15,2345678901234,Antibiotics
+Crocin Advance,30.00,75,GlaxoSmithKline,B003,2025-08-20,3456789012345,Pain Relief
+Azithromycin 500mg,85.25,25,Pfizer,B004,2026-01-10,4567890123456,Antibiotics
+Cetrizine 10mg,15.80,200,Ranbaxy,B005,2025-11-25,5678901234567,Antihistamine
+Omez 20mg,68.90,60,Dr Reddy's,B006,2026-02-28,6789012345678,Antacid
+Dolo 650mg,18.75,150,Micro Labs,B007,2025-10-15,7890123456789,Pain Relief
+Augmentin 625mg,125.50,30,GlaxoSmithKline,B008,2026-04-20,8901234567890,Antibiotics
+Allegra 120mg,35.25,80,Sanofi,B009,2025-09-30,9012345678901,Antihistamine
+Pan D,45.60,40,Alkem Labs,B010,2026-01-05,0123456789012,Antacid
