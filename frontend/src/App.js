@@ -1286,6 +1286,14 @@ const RMSApp = () => {
               🗄️ Backup & Restore
             </button>
           )}
+          {canAccessView('printer') && (
+            <button
+              onClick={() => setCurrentView('printer')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentView === 'printer' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            >
+              🖨️ Printer Settings
+            </button>
+          )}
           <button
             onClick={logout}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors"
