@@ -711,7 +711,16 @@ const RMSApp = () => {
       const newSale = addSale(saleData);
       
       if (newSale) {
-        // Clear cart and reset form
+        // Prepare print data
+        const printSaleData = {
+          ...newSale,
+          cashier_name: user.full_name || user.username
+        };
+
+        // Check if auto-print is enabled
+        const printerSettings = JSON.parse(localStorage.getItem('printerSettings') || '{}');
+        
+        // Clear cart and reset form first
         setCart([]);
         setCustomerName('');
         setCustomerPhone('');
@@ -724,7 +733,20 @@ const RMSApp = () => {
         fetchAnalytics();
         
         const message = isReturnMode ? 'Return processed successfully!' : 'Sale completed successfully!';
-        alert(message);
+        
+        // Handle printing
+        if (printerSettings.autoPrint) {
+          try {
+            await handlePrintInvoice(printSaleData, true);
+            alert(message + ' Invoice printed.');
+          } catch (error) {
+            alert(message + ' (Print failed: ' + error.message + ')');
+          }
+        } else {
+          alert(message + ' Click Print to generate invoice.');
+          // Store the sale for manual printing
+          setPrintSale(printSaleData);
+        }
         
         // Focus back to search for next transaction
         setTimeout(() => {
