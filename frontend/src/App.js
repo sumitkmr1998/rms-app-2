@@ -773,6 +773,161 @@ const RMSApp = () => {
     fetchMedicines(term); // Search in same medicines database
   };
 
+  // Print handling functions
+  const handlePrintInvoice = async (saleData, skipPreview = false) => {
+    try {
+      if (!saleData) {
+        throw new Error('No sale data to print');
+      }
+
+      // Create invoice content
+      const invoiceElement = document.createElement('div');
+      const invoiceComponent = React.createElement(Invoice, {
+        sale: saleData,
+        shop: shop,
+        type: 'invoice'
+      });
+      
+      // Render the invoice component to HTML
+      const invoiceHTML = `
+        <div class="invoice-print bg-white p-6 max-w-2xl mx-auto">
+          <div class="text-center border-b-2 border-gray-300 pb-4 mb-4">
+            <h1 class="text-2xl font-bold text-gray-900">${shop?.name || 'MediPOS Pharmacy'}</h1>
+            ${shop?.address ? `<p class="text-gray-600">${shop.address}</p>` : ''}
+            <div class="flex justify-center gap-4 text-sm text-gray-600 mt-2">
+              ${shop?.phone ? `<span>📞 ${shop.phone}</span>` : ''}
+              ${shop?.email ? `<span>📧 ${shop.email}</span>` : ''}
+            </div>
+            <div class="flex justify-center gap-4 text-sm text-gray-600">
+              ${shop?.license_number ? `<span>License: ${shop.license_number}</span>` : ''}
+              ${shop?.gst_number ? `<span>GST: ${shop.gst_number}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="flex justify-between mb-6">
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                ${saleData.is_return || saleData.total_amount < 0 ? '🔄 RETURN RECEIPT' : '📄 INVOICE'}
+              </h2>
+              <div class="text-sm text-gray-600 space-y-1">
+                <p><span class="font-medium">Receipt #:</span> ${saleData.receipt_number}</p>
+                <p><span class="font-medium">Date:</span> ${new Date(saleData.created_at).toLocaleString()}</p>
+                <p><span class="font-medium">Cashier:</span> ${saleData.cashier_name || 'Staff'}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              ${saleData.customer_name ? `
+                <div class="text-sm text-gray-600 space-y-1">
+                  <h3 class="font-medium text-gray-900">Customer Details</h3>
+                  <p>${saleData.customer_name}</p>
+                  ${saleData.customer_phone ? `<p>📱 ${saleData.customer_phone}</p>` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <table class="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr class="bg-gray-100">
+                  <th class="border border-gray-300 px-3 py-2 text-left text-sm font-medium">Item</th>
+                  <th class="border border-gray-300 px-3 py-2 text-center text-sm font-medium">Qty</th>
+                  <th class="border border-gray-300 px-3 py-2 text-right text-sm font-medium">Rate</th>
+                  <th class="border border-gray-300 px-3 py-2 text-right text-sm font-medium">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${saleData.items.map(item => `
+                  <tr>
+                    <td class="border border-gray-300 px-3 py-2 text-sm">
+                      ${item.is_return ? '🔄 ' : ''}${item.medicine_name}
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2 text-center text-sm">
+                      ${item.is_return ? `-${item.quantity}` : item.quantity}
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2 text-right text-sm">
+                      ₹${item.price.toFixed(2)}
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2 text-right text-sm">
+                      ${item.is_return ? `-₹${item.total.toFixed(2)}` : `₹${item.total.toFixed(2)}`}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="border-t-2 border-gray-300 pt-4">
+            <div class="flex justify-end">
+              <div class="w-64 space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium">Subtotal:</span>
+                  <span>₹${Math.abs(saleData.subtotal_amount || saleData.total_amount || 0).toFixed(2)}</span>
+                </div>
+                
+                ${saleData.discount_amount > 0 ? `
+                  <div class="flex justify-between text-sm text-orange-600">
+                    <span class="font-medium">
+                      Discount ${saleData.discount_type === 'percentage' ? `(${saleData.discount_value}%)` : ''}:
+                    </span>
+                    <span>-₹${saleData.discount_amount.toFixed(2)}</span>
+                  </div>
+                ` : ''}
+                
+                <div class="flex justify-between text-lg font-bold border-t border-gray-300 pt-2">
+                  <span>${saleData.is_return || saleData.total_amount < 0 ? 'Return Amount:' : 'Total Amount:'}</span>
+                  <span class="${saleData.is_return || saleData.total_amount < 0 ? 'text-orange-600' : 'text-green-600'}">
+                    ₹${Math.abs(saleData.total_amount || 0).toFixed(2)}
+                  </span>
+                </div>
+                
+                <div class="flex justify-between text-sm">
+                  <span class="font-medium">Payment Method:</span>
+                  <span class="capitalize">${saleData.payment_method || 'Cash'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-gray-200 text-center text-sm text-gray-600">
+            <p class="mb-2">Thank you for your business!</p>
+            <p>Please keep this receipt for your records</p>
+            ${saleData.is_return || saleData.total_amount < 0 ? `
+              <p class="text-orange-600 font-medium mt-2">
+                Returns must be accompanied by this receipt
+              </p>
+            ` : ''}
+            <div class="mt-4 text-xs text-gray-500">
+              <p>Generated on ${new Date().toLocaleString()}</p>
+              <p>MediPOS RMS - Pharmacy Management System</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Print the invoice
+      await printService.printInvoice(invoiceHTML, { skipPreview });
+      return true;
+    } catch (error) {
+      console.error('Print error:', error);
+      throw error;
+    }
+  };
+
+  const handlePrintLastSale = async () => {
+    if (!printSale) {
+      alert('No recent sale to print');
+      return;
+    }
+    
+    try {
+      await handlePrintInvoice(printSale);
+      alert('Print sent successfully');
+    } catch (error) {
+      alert('Print failed: ' + error.message);
+    }
+  };
+
   // Medicine management functions (existing code continues...)
   const resetMedicineForm = () => {
     setMedicineForm({
