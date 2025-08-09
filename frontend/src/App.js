@@ -2145,7 +2145,7 @@ const RMSApp = () => {
           {currentView === 'users' && <OfflineUserManagement />}
           {currentView === 'shop' && <ShopSettings />}
           {currentView === 'backup' && <BackupRestoreManagement />}
-          {currentView === 'backup' && <BackupRestoreManagement />}
+          {currentView === 'printer' && <PrinterSettings />}
         </>
       )}
       
