@@ -700,6 +700,7 @@ const RMSApp = () => {
       const total = subtotal - discountAmount;
 
       const saleData = {
+        receipt_number: `RCP${Date.now()}`,
         items: cart,
         total_amount: total,
         subtotal_amount: subtotal,
