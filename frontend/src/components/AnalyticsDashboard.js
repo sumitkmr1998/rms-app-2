@@ -34,78 +34,6 @@ const AnalyticsDashboard = () => {
   // API configuration
   const API_URL = `${BACKEND_URL}/api`;
 
-  const mockAnalyticsData = mockSalesData.length > 0 ? processAnalyticsData(mockSalesData) : {
-    total_sales: 125430.50,
-    total_transactions: 1248,
-    total_items_sold: 3420,
-    top_selling_medicines: [
-      { medicine_id: '1', name: 'Paracetamol 500mg', quantity: 450, revenue: 2250.00 },
-      { medicine_id: '2', name: 'Amoxicillin 250mg', quantity: 320, revenue: 4800.00 },
-      { medicine_id: '3', name: 'Vitamin D3', quantity: 280, revenue: 8400.00 },
-      { medicine_id: '4', name: 'Aspirin 75mg', quantity: 250, revenue: 1250.00 },
-      { medicine_id: '5', name: 'Omeprazole 20mg', quantity: 200, revenue: 3000.00 }
-    ],
-    daily_sales: [
-      { date: '2025-01-01', sales: 3200 },
-      { date: '2025-01-02', sales: 4100 },
-      { date: '2025-01-03', sales: 3800 },
-      { date: '2025-01-04', sales: 4500 },
-      { date: '2025-01-05', sales: 3900 },
-      { date: '2025-01-06', sales: 5200 },
-      { date: '2025-01-07', sales: 4800 }
-    ],
-    payment_method_breakdown: {
-      cash: 45230.25,
-      card: 38120.15,
-      upi: 42080.10
-    },
-    hourly_sales_pattern: Array.from({length: 24}, (_, i) => ({
-      hour: i,
-      sales: Math.random() * 3000 + 500
-    }))
-  };
-
-  const mockMedicinesSold = mockSalesData.length > 0 ? 
-    Object.values(mockSalesData.reduce((acc, sale) => {
-      sale.items.forEach(item => {
-        if (!acc[item.medicine_id]) {
-          acc[item.medicine_id] = {
-            medicine_id: item.medicine_id,
-            medicine_name: item.medicine_name,
-            total_quantity_sold: 0,
-            total_revenue: 0,
-            average_price: item.price,
-            sale_count: 0
-          };
-        }
-        acc[item.medicine_id].total_quantity_sold += item.quantity;
-        acc[item.medicine_id].total_revenue += item.total;
-        acc[item.medicine_id].sale_count += 1;
-      });
-      return acc;
-    }, {})).sort((a, b) => b.total_quantity_sold - a.total_quantity_sold) : 
-    [
-      { medicine_id: '1', medicine_name: 'Paracetamol 500mg', total_quantity_sold: 450, total_revenue: 2250.00, average_price: 5.00, sale_count: 90 },
-      { medicine_id: '2', medicine_name: 'Amoxicillin 250mg', total_quantity_sold: 320, total_revenue: 4800.00, average_price: 15.00, sale_count: 64 },
-      { medicine_id: '3', medicine_name: 'Vitamin D3', total_quantity_sold: 280, total_revenue: 8400.00, average_price: 30.00, sale_count: 56 },
-      { medicine_id: '4', medicine_name: 'Aspirin 75mg', total_quantity_sold: 250, total_revenue: 1250.00, average_price: 5.00, sale_count: 50 },
-      { medicine_id: '5', medicine_name: 'Omeprazole 20mg', total_quantity_sold: 200, total_revenue: 3000.00, average_price: 15.00, sale_count: 40 }
-    ];
-
-  const getMockStockHistory = (medicineId) => {
-    return mockStockMovements
-      .filter(movement => movement.medicine_id === medicineId)
-      .slice(-10) // Get last 10 movements
-      .map(movement => ({
-        date: format(movement.created_at, 'MMM dd'),
-        movement_type: movement.movement_type,
-        quantity_change: movement.quantity_change,
-        previous_stock: movement.previous_stock,
-        new_stock: movement.new_stock,
-        notes: movement.notes
-      }));
-  };
-
   useEffect(() => {
     fetchAnalyticsData();
     fetchMedicinesSoldData();
@@ -116,43 +44,59 @@ const AnalyticsDashboard = () => {
     setError('');
     
     try {
-      // In real implementation, this would be an API call
-      // const response = await axios.post(`${API_URL}/analytics/sales`, {
-      //   start_date: dateRange.start,
-      //   end_date: dateRange.end
-      // });
+      const response = await axios.post(`${API_URL}/analytics/sales`, {
+        start_date: dateRange.start + 'T00:00:00.000Z',
+        end_date: dateRange.end + 'T23:59:59.999Z'
+      });
       
-      // For now, using mock data
-      setTimeout(() => {
-        setAnalyticsData(mockAnalyticsData);
-        setLoading(false);
-      }, 1000);
+      setAnalyticsData(response.data);
+      setLoading(false);
     } catch (error) {
-      setError('Failed to fetch analytics data');
+      console.error('Error fetching analytics data:', error);
+      setError('Failed to fetch analytics data. Please check your connection.');
+      setAnalyticsData({
+        total_sales: 0,
+        total_transactions: 0,
+        total_items_sold: 0,
+        top_selling_medicines: [],
+        daily_sales: [],
+        payment_method_breakdown: {},
+        hourly_sales_pattern: []
+      });
       setLoading(false);
     }
   };
 
   const fetchMedicinesSoldData = async () => {
     try {
-      // In real implementation:
-      // const response = await axios.get(`${API_URL}/analytics/medicines-sold-summary?days=30`);
+      const daysBack = Math.floor((new Date(dateRange.end) - new Date(dateRange.start)) / (1000 * 60 * 60 * 24)) || 30;
+      const response = await axios.get(`${API_URL}/analytics/medicines-sold-summary?days=${daysBack}`);
       
-      setMedicinesSoldData(mockMedicinesSold);
+      setMedicinesSoldData(response.data.medicines_summary || []);
     } catch (error) {
       console.error('Failed to fetch medicines sold data', error);
+      setMedicinesSoldData([]);
     }
   };
 
   const fetchMedicineStockHistory = async (medicineId) => {
     try {
-      // In real implementation:
-      // const response = await axios.get(`${API_URL}/analytics/stock-history/${medicineId}?days=30`);
+      const daysBack = Math.floor((new Date(dateRange.end) - new Date(dateRange.start)) / (1000 * 60 * 60 * 24)) || 30;
+      const response = await axios.get(`${API_URL}/analytics/stock-history/${medicineId}?days=${daysBack}`);
       
-      const mockStockHistory = getMockStockHistory(medicineId);
-      setMedicineStockHistory(mockStockHistory);
+      const stockHistory = response.data.stock_movements?.map(movement => ({
+        date: format(new Date(movement.date), 'MMM dd'),
+        movement_type: movement.movement_type,
+        quantity_change: movement.quantity_change,
+        previous_stock: movement.previous_stock,
+        new_stock: movement.new_stock,
+        notes: movement.notes
+      })) || [];
+      
+      setMedicineStockHistory(stockHistory);
     } catch (error) {
       console.error('Failed to fetch stock history', error);
+      setMedicineStockHistory([]);
     }
   };
 
