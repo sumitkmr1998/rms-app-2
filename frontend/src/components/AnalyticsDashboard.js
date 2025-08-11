@@ -393,7 +393,7 @@ const AnalyticsDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {pieChartData.map((item, index) => {
-                      const percentage = ((item.value / analyticsData.total_sales) * 100).toFixed(1);
+                      const percentage = analyticsData?.total_sales ? ((item.value / analyticsData.total_sales) * 100).toFixed(1) : '0.0';
                       return (
                         <div key={item.name} className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
                           <div className="flex items-center gap-3">
