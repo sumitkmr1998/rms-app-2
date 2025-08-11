@@ -482,54 +482,75 @@ const AnalyticsDashboard = () => {
               <Package className="w-5 h-5" />
               Complete Medicines Sold Summary
             </CardTitle>
-            <CardDescription>Detailed breakdown of all products with quantities sold</CardDescription>
+            <CardDescription>
+              Detailed breakdown of all products with quantities sold
+              {medicinesSoldData.length === 0 && (
+                <span className="text-orange-600 ml-2">(No sales data available - try making some test sales in the POS system)</span>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Medicine Name</th>
-                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Quantity Sold</th>
-                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Revenue</th>
-                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Avg. Price</th>
-                    <th className="text-right py-3 px-4 font-semibold text-slate-700">Sale Count</th>
-                    <th className="text-center py-3 px-4 font-semibold text-slate-700">Performance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {medicinesSoldData.map((medicine, index) => (
-                    <tr key={medicine.medicine_id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-blue-600"></div>
-                          <span className="font-medium">{medicine.medicine_name}</span>
-                        </div>
-                      </td>
-                      <td className="text-right py-3 px-4 font-semibold text-blue-600">
-                        {medicine.total_quantity_sold}
-                      </td>
-                      <td className="text-right py-3 px-4 font-semibold text-green-600">
-                        {formatCurrency(medicine.total_revenue)}
-                      </td>
-                      <td className="text-right py-3 px-4">
-                        {formatCurrency(medicine.average_price)}
-                      </td>
-                      <td className="text-right py-3 px-4 text-slate-600">
-                        {medicine.sale_count}
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <Badge variant={index < 3 ? 'default' : 'secondary'} className={
-                          index < 3 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
-                        }>
-                          {index < 3 ? 'Top Seller' : 'Regular'}
-                        </Badge>
-                      </td>
+            {medicinesSoldData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700">Medicine Name</th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">Quantity Sold</th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">Total Revenue</th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">Avg. Price</th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-700">Sale Count</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700">Performance</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {medicinesSoldData.map((medicine, index) => (
+                      <tr key={medicine.medicine_id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-blue-600"></div>
+                            <span className="font-medium">{medicine.medicine_name}</span>
+                          </div>
+                        </td>
+                        <td className="text-right py-3 px-4 font-semibold text-blue-600">
+                          {medicine.total_quantity_sold}
+                        </td>
+                        <td className="text-right py-3 px-4 font-semibold text-green-600">
+                          {formatCurrency(medicine.total_revenue)}
+                        </td>
+                        <td className="text-right py-3 px-4">
+                          {formatCurrency(medicine.average_price)}
+                        </td>
+                        <td className="text-right py-3 px-4 text-slate-600">
+                          {medicine.sale_count}
+                        </td>
+                        <td className="text-center py-3 px-4">
+                          <Badge variant={index < 3 ? 'default' : 'secondary'} className={
+                            index < 3 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
+                          }>
+                            {index < 3 ? 'Top Seller' : 'Regular'}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-600 text-lg font-medium">No Sales Data Available</p>
+                <p className="text-slate-500 mt-2">
+                  Start by adding medicines to your inventory and making sales through the POS system.
+                </p>
+                <div className="mt-6 space-y-2 text-sm text-slate-500">
+                  <p>💡 <strong>Getting Started:</strong></p>
+                  <p>1. Go to "Inventory Management" to add medicines</p>
+                  <p>2. Use the "POS System" to make test sales</p>
+                  <p>3. Return here to see your analytics data</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
