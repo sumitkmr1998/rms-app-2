@@ -7,58 +7,53 @@ Of course. Let's scrap the previous complex methods. You are right to ask for a 
 
 Here is the most straightforward, reliable method to give this application to a non-technical user.
 
-The Simple "Web Browser App" Method
+### The Simple "Web Browser App" Method
 
-The goal is to give the user a single folder. They will run one file to start everything, and it will open in their web browser, just like a normal website. This method avoids all the complexities of PyInstaller and Electron.
+The goal is to give the user a single folder. They will run one file to start everything, and it will open in their web browser, just like a normal website. This method avoids all the complexities of `PyInstaller` and `Electron`.
 
-What you will create:
-A simple ZIP file containing the project and two scripts: start-medipos.bat and stop-medipos.bat.
+**What you will create:**
+A simple ZIP file containing the project and two scripts: `start-medipos.bat` and `stop-medipos.bat`.
 
-What the end-user needs:
+**What the end-user needs:**
 A one-time setup of Python and Node.js on their computer. This is far easier than troubleshooting a broken installer.
 
-Step 1: Prepare the User's Computer (One-Time Setup)
+---
+
+### Step 1: Prepare the User's Computer (One-Time Setup)
 
 You need to provide these simple instructions to the end-user (the pharmacy owner). They only have to do this once.
 
-Install Python: Download and install Python from python.org. Important: During installation, make sure to check the box that says "Add Python to PATH".
-
-Install Node.js: Download and install the "LTS" version of Node.js from nodejs.org.
+1.  **Install Python:** Download and install Python from [python.org](https://www.python.org/downloads/). **Important:** During installation, make sure to check the box that says **"Add Python to PATH"**.
+2.  **Install Node.js:** Download and install the "LTS" version of Node.js from [nodejs.org](https://nodejs.org/).
 
 That's it for their setup.
 
-Step 2: Prepare Your Project Folder for Distribution
+---
+
+### Step 2: Prepare Your Project Folder for Distribution
 
 Now, let's get your code ready.
 
-Clean up your project root: Delete any old dist, build, or .spec files/folders from previous attempts.
+1.  **Clean up your project root:** Delete any old `dist`, `build`, or `.spec` files/folders from previous attempts.
+2.  **Install Frontend Dependencies:** Navigate to your `frontend` directory and run `yarn install` to make sure all packages are there.
+3.  **Install Backend Dependencies:**
+    *   Navigate to your `backend` directory: `cd backend`
+    *   Install the required packages: `python -m pip install -r requirements.txt`
+    *   Go back to the root directory: `cd ..`
 
-Install Frontend Dependencies: Navigate to your frontend directory and run yarn install to make sure all packages are there.
+4.  **No more building or packaging is needed.** We will run the code directly from the source.
 
-Install Backend Dependencies:
+---
 
-Navigate to your backend directory: cd backend
+### Step 3: Create the Master Start and Stop Scripts
 
-Install the required packages: python -m pip install -r requirements.txt
+This is the core of the simple method. In your project's **root directory**, create the following two files.
 
-Go back to the root directory: cd ..
+#### **`start-medipos.bat`**
 
-No more building or packaging is needed. We will run the code directly from the source.
+Create a new text file, paste the code below, and save it as `start-medipos.bat`.
 
-Step 3: Create the Master Start and Stop Scripts
-
-This is the core of the simple method. In your project's root directory, create the following two files.
-
-start-medipos.bat
-
-Create a new text file, paste the code below, and save it as start-medipos.bat.
-
-code
-Batch
-download
-content_copy
-expand_less
-
+```batch
 @echo off
 TITLE MediPOS Control Panel - DO NOT CLOSE THIS WINDOW
 
@@ -93,17 +88,13 @@ echo ==========================================================
 echo  SUCCESS! All systems are starting up.
 echo  The application will open in your web browser shortly.
 echo ==========================================================
-stop-medipos.bat
+```
 
-Create another text file, paste this code, and save it as stop-medipos.bat.
+#### **`stop-medipos.bat`**
 
-code
-Batch
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+Create another text file, paste this code, and save it as `stop-medipos.bat`.
+
+```batch
 @echo off
 TITLE MediPOS Shutdown
 
@@ -126,29 +117,24 @@ echo ==========================================================
 echo  Shutdown complete. You can now close this window.
 echo ==========================================================
 pause
+```
+*Note: This `stop.bat` is very aggressive and will close *all* running `python` and `node` processes. It's simple but not suitable if the user runs other Python/Node apps.*
 
-Note: This stop.bat is very aggressive and will close all running python and node processes. It's simple but not suitable if the user runs other Python/Node apps.
+---
 
-Step 4: Final Steps and Instructions for the User
+### Step 4: Final Steps and Instructions for the User
 
 You are done. The process is now incredibly simple.
 
-Zip the entire project folder (which now includes start-medipos.bat and stop-medipos.bat).
+1.  **Zip the entire project folder** (which now includes `start-medipos.bat` and `stop-medipos.bat`).
+2.  Give this single ZIP file to your user.
 
-Give this single ZIP file to your user.
-
-Your instructions for the user are:
-
-Make sure you have installed Python and Node.js (one time only).
-
-Unzip the MediPOS.zip file to a location like your Desktop.
-
-Open the folder and double-click start-medipos.bat.
-
-Wait for the terminal windows to open and the application to launch in your browser.
-
-When you are finished, double-click stop-medipos.bat.
-
+**Your instructions for the user are:**
+1.  Make sure you have installed Python and Node.js (one time only).
+2.  Unzip the `MediPOS.zip` file to a location like your Desktop.
+3.  Open the folder and double-click **`start-medipos.bat`**.
+4.  Wait for the terminal windows to open and the application to launch in your browser.
+5.  When you are finished, double-click **`stop-medipos.bat`**.
 v12
 Summary: ✅ **MediPOS System Successfully Installed and Running!**
 
