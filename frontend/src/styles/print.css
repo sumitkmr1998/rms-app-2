@@ -1,0 +1,284 @@
+/* Print-specific styles for invoices */
+
+@media print {
+  /* Hide non-printable elements */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Page setup */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+  
+  /* Body styles for print */
+  body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Invoice container */
+  .invoice-print {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    background: white;
+    box-shadow: none;
+  }
+  
+  /* Headers */
+  .invoice-print h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0 0 10pt 0;
+    text-align: center;
+  }
+  
+  .invoice-print h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0 0 8pt 0;
+  }
+  
+  .invoice-print h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0 0 6pt 0;
+  }
+  
+  /* Table styles */
+  .invoice-print table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10pt 0;
+    page-break-inside: avoid;
+  }
+  
+  .invoice-print th,
+  .invoice-print td {
+    border: 1pt solid #000;
+    padding: 6pt;
+    text-align: left;
+    vertical-align: top;
+  }
+  
+  .invoice-print th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+  }
+  
+  /* Text alignment utilities */
+  .text-center {
+    text-align: center !important;
+  }
+  
+  .text-right {
+    text-align: right !important;
+  }
+  
+  .text-left {
+    text-align: left !important;
+  }
+  
+  /* Font weights */
+  .font-bold {
+    font-weight: bold !important;
+  }
+  
+  .font-medium {
+    font-weight: 500 !important;
+  }
+  
+  /* Borders */
+  .border-t {
+    border-top: 2pt solid #000 !important;
+  }
+  
+  .border-b {
+    border-bottom: 2pt solid #000 !important;
+  }
+  
+  .border-t-2 {
+    border-top: 2pt solid #000 !important;
+  }
+  
+  .border-b-2 {
+    border-bottom: 2pt solid #000 !important;
+  }
+  
+  /* Colors for print */
+  .text-green-600 {
+    color: #000 !important;
+  }
+  
+  .text-orange-600 {
+    color: #000 !important;
+  }
+  
+  .text-blue-600 {
+    color: #000 !important;
+  }
+  
+  .text-red-600 {
+    color: #000 !important;
+  }
+  
+  .text-gray-600 {
+    color: #333 !important;
+  }
+  
+  .text-gray-500 {
+    color: #666 !important;
+  }
+  
+  .text-slate-600 {
+    color: #333 !important;
+  }
+  
+  .text-slate-500 {
+    color: #666 !important;
+  }
+  
+  /* Spacing utilities */
+  .mb-2 {
+    margin-bottom: 6pt !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 12pt !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 18pt !important;
+  }
+  
+  .mt-2 {
+    margin-top: 6pt !important;
+  }
+  
+  .mt-4 {
+    margin-top: 12pt !important;
+  }
+  
+  .mt-6 {
+    margin-top: 18pt !important;
+  }
+  
+  .mt-8 {
+    margin-top: 24pt !important;
+  }
+  
+  .p-4 {
+    padding: 12pt !important;
+  }
+  
+  .p-6 {
+    padding: 18pt !important;
+  }
+  
+  .pt-2 {
+    padding-top: 6pt !important;
+  }
+  
+  .pt-4 {
+    padding-top: 12pt !important;
+  }
+  
+  .pb-4 {
+    padding-bottom: 12pt !important;
+  }
+  
+  /* Page break controls */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+  
+  /* Receipt-specific styles for thermal printers */
+  .receipt-format {
+    max-width: 80mm;
+    font-size: 10pt;
+    line-height: 1.2;
+  }
+  
+  .receipt-format h1 {
+    font-size: 14pt;
+  }
+  
+  .receipt-format h2 {
+    font-size: 12pt;
+  }
+  
+  .receipt-format th,
+  .receipt-format td {
+    padding: 3pt;
+    font-size: 9pt;
+  }
+  
+  .receipt-format .text-xs {
+    font-size: 8pt;
+  }
+  
+  /* Compact spacing for receipts */
+  .receipt-format .mb-2 {
+    margin-bottom: 3pt !important;
+  }
+  
+  .receipt-format .mb-4 {
+    margin-bottom: 6pt !important;
+  }
+  
+  .receipt-format .mt-4 {
+    margin-top: 6pt !important;
+  }
+}
+
+/* Screen styles - hide print button when printing */
+@media screen {
+  .print-only {
+    display: none;
+  }
+}
+
+/* Flexbox utilities that work in print */
+@media print {
+  .flex {
+    display: block !important;
+  }
+  
+  .flex.justify-between > *:first-child {
+    float: left;
+  }
+  
+  .flex.justify-between > *:last-child {
+    float: right;
+  }
+  
+  .flex.justify-center {
+    text-align: center;
+  }
+  
+  .flex.justify-end {
+    text-align: right;
+  }
+  
+  /* Clear floats */
+  .flex.justify-between::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
