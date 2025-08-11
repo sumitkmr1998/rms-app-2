@@ -31,25 +31,8 @@ const AnalyticsDashboard = () => {
   const [medicineStockHistory, setMedicineStockHistory] = useState([]);
   const [error, setError] = useState('');
 
-  // Mock data for demonstration - in real app, this would come from backend
-  const [mockSalesData, setMockSalesData] = useState([]);
-  const [mockStockMovements, setMockStockMovements] = useState([]);
-
-  // Initialize mock data
-  useEffect(() => {
-    const salesData = generateMockSalesData();
-    const medicines = [
-      { id: '1', name: 'Paracetamol 500mg', price: 5.00 },
-      { id: '2', name: 'Amoxicillin 250mg', price: 15.00 },
-      { id: '3', name: 'Vitamin D3', price: 30.00 },
-      { id: '4', name: 'Aspirin 75mg', price: 5.00 },
-      { id: '5', name: 'Omeprazole 20mg', price: 15.00 }
-    ];
-    const stockMovements = generateStockMovements(medicines);
-    
-    setMockSalesData(salesData);
-    setMockStockMovements(stockMovements);
-  }, []);
+  // API configuration
+  const API_URL = `${BACKEND_URL}/api`;
 
   const mockAnalyticsData = mockSalesData.length > 0 ? processAnalyticsData(mockSalesData) : {
     total_sales: 125430.50,
