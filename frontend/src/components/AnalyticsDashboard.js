@@ -206,13 +206,19 @@ const AnalyticsDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-blue-700">Total Sales</p>
-                    <p className="text-3xl font-bold text-blue-900">{formatCurrency(analyticsData.total_sales)}</p>
+                    <p className="text-3xl font-bold text-blue-900">{formatCurrency(analyticsData.total_sales || 0)}</p>
                   </div>
                   <DollarSign className="w-8 h-8 text-blue-600" />
                 </div>
                 <div className="mt-2 flex items-center text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                  <span className="text-green-600">12.5% from last month</span>
+                  {analyticsData.total_sales > 0 ? (
+                    <>
+                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
+                      <span className="text-green-600">Ready for business!</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-500">No sales data yet</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -222,13 +228,19 @@ const AnalyticsDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-green-700">Transactions</p>
-                    <p className="text-3xl font-bold text-green-900">{analyticsData.total_transactions.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-green-900">{(analyticsData.total_transactions || 0).toLocaleString()}</p>
                   </div>
                   <ShoppingCart className="w-8 h-8 text-green-600" />
                 </div>
                 <div className="mt-2 flex items-center text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                  <span className="text-green-600">8.2% from last month</span>
+                  {analyticsData.total_transactions > 0 ? (
+                    <>
+                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
+                      <span className="text-green-600">Active sales tracking</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-500">Start your first sale</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -238,13 +250,19 @@ const AnalyticsDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-purple-700">Items Sold</p>
-                    <p className="text-3xl font-bold text-purple-900">{analyticsData.total_items_sold.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-purple-900">{(analyticsData.total_items_sold || 0).toLocaleString()}</p>
                   </div>
                   <Package className="w-8 h-8 text-purple-600" />
                 </div>
                 <div className="mt-2 flex items-center text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                  <span className="text-green-600">15.8% from last month</span>
+                  {analyticsData.total_items_sold > 0 ? (
+                    <>
+                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
+                      <span className="text-green-600">Inventory moving</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-500">Add items to inventory</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -255,14 +273,20 @@ const AnalyticsDashboard = () => {
                   <div>
                     <p className="text-sm font-medium text-orange-700">Avg. Transaction</p>
                     <p className="text-3xl font-bold text-orange-900">
-                      {formatCurrency(analyticsData.total_sales / analyticsData.total_transactions)}
+                      {formatCurrency(analyticsData.total_transactions > 0 ? (analyticsData.total_sales / analyticsData.total_transactions) : 0)}
                     </p>
                   </div>
                   <Users className="w-8 h-8 text-orange-600" />
                 </div>
                 <div className="mt-2 flex items-center text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                  <span className="text-green-600">5.3% from last month</span>
+                  {analyticsData.total_transactions > 0 ? (
+                    <>
+                      <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
+                      <span className="text-green-600">Healthy average</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-500">Calculate on first sale</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
