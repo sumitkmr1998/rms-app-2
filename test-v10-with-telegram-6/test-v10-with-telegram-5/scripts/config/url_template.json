@@ -1,0 +1,24 @@
+{
+  "check_interval_minutes": 30,
+  "url_pattern": "https://[a-f0-9\\-]+\\.preview\\.emergentagent\\.com",
+  "last_refresh": null,
+  "refresh_threshold_hours": 12,
+  "backend_internal_port": 8001,
+  "frontend_internal_port": 3000,
+  "fallback_urls": {
+    "backend": "http://localhost:8001",
+    "frontend": "http://localhost:3000"
+  },
+  "manual_override_url": null,
+  "notification_settings": {
+    "log_level": "INFO",
+    "alert_on_failure": true,
+    "max_retry_attempts": 3
+  },
+  "health_check_settings": {
+    "timeout_seconds": 10,
+    "retry_delay_seconds": 5,
+    "backend_health_endpoint": "/api/",
+    "frontend_health_endpoint": "/"
+  }
+}
