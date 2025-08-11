@@ -21,14 +21,12 @@ module.exports = {
         });
         
         // Disable watch mode
-        // # ignored is READONLY, DO NOT EDIT THIS
         webpackConfig.watch = false;
         webpackConfig.watchOptions = {
           ignored: /.*/, // Ignore all files
         };
       } else {
         // Add ignored patterns to reduce watched directories
-        // IMPORTANT: ignored list can only be appended, but not overridden
         webpackConfig.watchOptions = {
           ...webpackConfig.watchOptions,
           ignored: [
