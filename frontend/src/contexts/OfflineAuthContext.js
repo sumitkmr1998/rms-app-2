@@ -777,7 +777,16 @@ export const OfflineAuthProvider = ({ children }) => {
     // Data Management
     exportData,
     importData,
-    clearAllData
+    clearAllData,
+    
+    // Backup and Restore
+    getBackupList,
+    createBackup,
+    restoreBackup,
+    deleteBackup,
+    downloadBackup,
+    uploadBackupFile,
+    getBackupPreview
   };
 
   return (
