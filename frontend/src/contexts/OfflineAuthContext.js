@@ -589,6 +589,159 @@ export const OfflineAuthProvider = ({ children }) => {
     }
   };
 
+  // Backup and Restore Functions
+  const getBackupList = async () => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/list`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch backups: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Get backup list error:', error);
+      return { backups: [] };
+    }
+  };
+
+  const createBackup = async (backupOptions) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backupOptions),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create backup: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Create backup error:', error);
+      throw error;
+    }
+  };
+
+  const restoreBackup = async (restoreOptions) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/restore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(restoreOptions),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to restore backup: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Restore backup error:', error);
+      throw error;
+    }
+  };
+
+  const deleteBackup = async (backupId) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/${backupId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete backup: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Delete backup error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const downloadBackup = async (backupId, backupName) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/download/${backupId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to download backup: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${backupName || 'backup'}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return true;
+    } catch (error) {
+      console.error('Download backup error:', error);
+      return false;
+    }
+  };
+
+  const uploadBackupFile = async (file) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${backendUrl}/api/backup/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to upload backup: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Upload backup error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const getBackupPreview = async (backupId) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/backup/preview/${backupId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to get backup preview: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Get backup preview error:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     login,
