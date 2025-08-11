@@ -14,7 +14,10 @@ import {
   LineChart, Line, ComposedChart, Legend
 } from 'recharts';
 import { format, subDays, parseISO, isValid } from 'date-fns';
-import { generateMockSalesData, generateStockMovements, processAnalyticsData } from '../utils/mockDataGenerator';
+import axios from 'axios';
+
+// Get backend URL from environment
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AnalyticsDashboard = () => {
   const [dateRange, setDateRange] = useState({
