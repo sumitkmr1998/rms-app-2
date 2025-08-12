@@ -499,6 +499,84 @@ class BackupPreview(BaseModel):
     data_summary: Dict[str, int]
     categories_available: List[str]
 
+# Patient Management Models
+class ProcedureType(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    fee: float
+    description: Optional[str] = None
+
+class DefaultFeeSettings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    consultation_fee: float = 100.0
+    procedures: List[ProcedureType] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Patient(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone: str
+    address: str
+    patient_number: str  # Auto-generated patient ID like PAT001
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientVisit(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    patient_name: str  # Denormalized for easier queries
+    visit_date: datetime = Field(default_factory=datetime.utcnow)
+    service_type: str  # 'consultation' or 'procedure'
+    procedure_name: Optional[str] = None  # Name of procedure if service_type is 'procedure'
+    fee_amount: float
+    total_fee: float
+    payment_method: str = 'cash'
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientCreate(BaseModel):
+    name: str
+    phone: str
+    address: str
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
+
+class PatientUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
+
+class PatientVisitCreate(BaseModel):
+    patient_id: str
+    service_type: str  # 'consultation' or 'procedure'
+    procedure_name: Optional[str] = None
+    fee_amount: float
+    payment_method: str = 'cash'
+    notes: Optional[str] = None
+
+class PatientAnalyticsRequest(BaseModel):
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    date_range: Optional[str] = None  # 'today', 'yesterday', 'this_month', 'custom'
+
+class PatientAnalyticsResponse(BaseModel):
+    total_patients: int
+    total_visits: int
+    total_revenue: float
+    consultations_count: int
+    procedures_count: int
+    consultation_revenue: float
+    procedure_revenue: float
+    daily_visits: List[Dict]
+    popular_procedures: List[Dict]
+    date_range: str
+    period_label: str
+
 # Global processor instance
 tally_processor = TallyDataProcessor()
 
