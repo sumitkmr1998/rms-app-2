@@ -11,6 +11,7 @@ import ShopSettings from './components/ShopSettings';
 import TallyImport from './components/TallyImport';
 import TelegramNotifications from './components/TelegramNotifications';
 import Settings from './components/Settings';
+import PatientManagement from './components/PatientManagement';
 import Invoice from './components/Invoice';
 import PrintService from './components/PrintService';
 import { Toaster } from './components/ui/toaster';
