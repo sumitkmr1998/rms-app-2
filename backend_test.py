@@ -541,7 +541,7 @@ class MediPOSAPITester:
 def main():
     """Main function"""
     # Check if custom URL is provided
-    base_url = "http://localhost:8001"
+    base_url = "http://LOCALHOST:8001"  # Use the same URL as frontend
     
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
