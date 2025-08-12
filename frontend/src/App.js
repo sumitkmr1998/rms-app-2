@@ -1614,6 +1614,7 @@ const RMSApp = () => {
               {discountType !== 'none' && (
                 <div className="flex items-center gap-2">
                   <input
+                    ref={discountValueRef}
                     type="number"
                     value={discountValue}
                     onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
