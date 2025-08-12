@@ -622,14 +622,14 @@ const RMSApp = () => {
   };
 
   // Data fetching functions using offline storage
-  const fetchMedicines = (search = '') => {
+  const fetchMedicines = useCallback((search = '') => {
     try {
       const medicineList = getMedicines(search);
       setMedicines(medicineList);
     } catch (error) {
       console.error('Error fetching medicines:', error);
     }
-  };
+  }, [getMedicines]);
 
   const fetchSales = () => {
     try {
