@@ -1548,7 +1548,14 @@ const RMSApp = () => {
                 >
                   -
                 </button>
-                <span className="w-8 text-center font-medium">{item.quantity}</span>
+                <input
+                  type="number"
+                  value={item.quantity}
+                  onChange={(e) => updateCartQuantity(item.medicine_id, parseInt(e.target.value) || 0, item.is_return)}
+                  className="w-12 text-center font-medium border border-slate-200 rounded px-1 py-0.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  data-quantity-input="true"
+                  min="1"
+                />
                 <button
                   onClick={() => updateCartQuantity(item.medicine_id, item.quantity + 1, item.is_return)}
                   className="w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-sm font-bold transition-colors"
