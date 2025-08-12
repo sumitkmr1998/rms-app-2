@@ -12,7 +12,7 @@ import uuid
 import os
 
 class MediPOSAPITester:
-    def __init__(self, base_url="http://LOCALHOST:8001"):
+    def __init__(self, base_url="http://localhost:8001"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
