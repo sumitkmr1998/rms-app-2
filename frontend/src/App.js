@@ -1658,21 +1658,16 @@ const RMSApp = () => {
         {/* Payment Method */}
         <div className="border-t border-slate-200 pt-4 mb-4">
           <h4 className="font-semibold text-slate-900 mb-3">💳 Payment Method</h4>
-          <div className="flex gap-2">
-            {['cash', 'card', 'upi'].map((method) => (
-              <button
-                key={method}
-                onClick={() => setPaymentMethod(method)}
-                className={`flex-1 p-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-                  paymentMethod === method 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {method} {paymentMethod === method && '✓'}
-              </button>
-            ))}
-          </div>
+          <select
+            ref={paymentMethodRef}
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+          >
+            <option value="cash">💵 Cash</option>
+            <option value="card">💳 Card</option>
+            <option value="upi">📱 UPI</option>
+          </select>
           <p className="text-xs text-slate-500 mt-1">Press F5 to cycle through payment methods</p>
         </div>
 
