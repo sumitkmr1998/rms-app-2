@@ -868,6 +868,7 @@ const RMSApp = () => {
         setDiscountType('none');
         setDiscountValue(0);
         setIsReturnMode(false);
+        setKeyboardNavMode(false); // Reset keyboard navigation mode
         fetchMedicines();
         fetchSales();
         fetchAnalytics();
