@@ -1696,6 +1696,7 @@ const RMSApp = () => {
             </div>
 
             <button
+              ref={completeSaleRef}
               onClick={handleCheckout}
               className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg ${
                 isReturnMode || getCartTotal() < 0
