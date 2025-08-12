@@ -33,7 +33,7 @@ echo "   - System startup: /app/scripts/startup.sh"
 echo ""
 
 echo "5. When you get a new URL from Emergent Agent Platform:"
-echo "   Example: /app/scripts/manual_url_update.sh https://medreg-system.preview.emergentagent.com"
+echo "   Example: /app/scripts/manual_url_update.sh https://pos-input-repair.preview.emergentagent.com"
 echo ""
 
 echo "=================================================="

@@ -24,7 +24,7 @@ sudo /app/scripts/install_startup_service.sh
 ### 2. When You Get a New Preview URL
 ```bash
 # Update with new URL from Emergent Agent Platform
-/app/scripts/manual_url_update.sh https://medreg-system.preview.emergentagent.com
+/app/scripts/manual_url_update.sh https://pos-input-repair.preview.emergentagent.com
 ```
 
 ### 3. Check URL Status
@@ -120,7 +120,7 @@ Main configuration file (auto-generated):
 python3 /app/scripts/refresh_preview_urls.py --check-only
 
 # If expired, get new URL from Emergent Agent Platform and apply:
-/app/scripts/manual_url_update.sh https://medreg-system.preview.emergentagent.com
+/app/scripts/manual_url_update.sh https://pos-input-repair.preview.emergentagent.com
 ```
 
 ### Scenario 3: Continuous Monitoring
@@ -205,7 +205,7 @@ Since API keys are not available for automatic URL generation:
 
 3. **Apply new URL**:
    ```bash
-   /app/scripts/manual_url_update.sh https://medreg-system.preview.emergentagent.com
+   /app/scripts/manual_url_update.sh https://pos-input-repair.preview.emergentagent.com
    ```
 
 4. **Verify system**:

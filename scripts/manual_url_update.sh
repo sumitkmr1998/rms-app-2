@@ -34,7 +34,7 @@ main() {
     # Check if URL is provided as argument
     if [ $# -eq 0 ]; then
         echo "Usage: $0 <new_preview_url>"
-        echo "Example: $0 https://medreg-system.preview.emergentagent.com"
+        echo "Example: $0 https://pos-input-repair.preview.emergentagent.com"
         echo ""
         echo "To get a new preview URL:"
         echo "1. Go to your Emergent Agent Platform dashboard"
@@ -49,7 +49,7 @@ main() {
     # Validate URL format
     if ! validate_url "$NEW_URL"; then
         log "ERROR: Invalid URL format"
-        log "Expected format: https://medreg-system.preview.emergentagent.com"
+        log "Expected format: https://pos-input-repair.preview.emergentagent.com"
         log "Provided URL: $NEW_URL"
         exit 1
     fi
