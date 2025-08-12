@@ -2518,8 +2518,12 @@ async def update_fee_settings(settings_data: DefaultFeeSettings):
             
             if result.modified_count:
                 updated_settings = await db.fee_settings.find_one({"id": existing_settings["id"]})
-                updated_settings.pop("_id", None)
-                return updated_settings
+                if updated_settings:
+                    updated_settings.pop("_id", None)
+                    return updated_settings
+                else:
+                    # Fallback to returning the update data
+                    return update_data
             else:
                 existing_settings.pop("_id", None)
                 return existing_settings
