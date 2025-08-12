@@ -162,6 +162,7 @@ const RMSApp = () => {
       case 'backup': // Add backup access to admin and manager
       case 'settings': // Settings (includes printer, shop, users, backup, telegram) for admin and manager
       case 'telegram': // Telegram notifications for admin and manager
+      case 'patients': // Patient management for admin and manager
         return ['admin', 'manager'].includes(userRole);
       case 'pos':
       case 'sales':
