@@ -1715,12 +1715,12 @@ const RMSApp = () => {
                 isReturnMode || getCartTotal() < 0
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
                   : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-              }`}
+              } ${keyboardNavMode ? 'ring-2 ring-blue-300' : ''}`}
               disabled={cart.length === 0}
             >
               {isReturnMode || getCartTotal() < 0 
-                ? '↩️ Process Return (F2)' 
-                : '✅ Complete Sale (F2)'
+                ? '↩️ Process Return (F2 or Enter)' 
+                : '✅ Complete Sale (F2 or Enter)'
               }
             </button>
             
