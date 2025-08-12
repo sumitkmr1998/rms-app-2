@@ -149,6 +149,10 @@ const RMSApp = () => {
   const customerNameRef = useRef(null);
   const customerPhoneRef = useRef(null);
   const returnSearchRef = useRef(null);
+  const quantityRef = useRef(null);
+  const discountValueRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const completeSaleRef = useRef(null);
 
   // Check user permissions
   const canAccessView = (view) => {
