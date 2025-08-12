@@ -67,6 +67,7 @@ const RMSApp = () => {
   const [discountValue, setDiscountValue] = useState(0);
   const [isReturnMode, setIsReturnMode] = useState(false);
   const [returnSearchTerm, setReturnSearchTerm] = useState('');
+  const [keyboardNavMode, setKeyboardNavMode] = useState(false); // Track if user is using keyboard navigation
   
   // Loading and Authentication State
   const [loading, setLoading] = useState(true);
