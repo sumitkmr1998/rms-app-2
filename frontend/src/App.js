@@ -239,6 +239,7 @@ const RMSApp = () => {
         // Handle Enter key navigation flow
         if (e.key === 'Enter') {
           e.preventDefault();
+          setKeyboardNavMode(true); // Enable keyboard navigation mode
           
           // Search field - add selected medicine to cart and focus quantity
           if (e.target === searchRef.current) {
@@ -276,10 +277,10 @@ const RMSApp = () => {
             return;
           }
           
-          // Quantity input - focus discount
+          // Quantity input - focus next step based on context
           if (e.target.hasAttribute('data-quantity-input')) {
             // Focus discount value if discount type is not 'none'
-            if (discountType !== 'none') {
+            if (discountType !== 'none' && !isReturnMode) {
               discountValueRef.current?.focus();
               discountValueRef.current?.select();
             } else {
@@ -323,9 +324,10 @@ const RMSApp = () => {
           }
         }
         
-        // Handle Escape to blur input
+        // Handle Escape to blur input and disable keyboard nav mode
         if (e.key === 'Escape') {
           e.target.blur();
+          setKeyboardNavMode(false);
         }
         return;
       }
