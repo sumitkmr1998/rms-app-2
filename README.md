@@ -544,7 +544,7 @@ index 0000000..db2cfbc
 +import os
 +
 +class MediPOSAPITester:
-+    def __init__(self, base_url="https://032a89b3-6988-4f45-9ef0-f2fe91e9bf8f.preview.emergentagent.com"):
++    def __init__(self, base_url="https://medreg-system.preview.emergentagent.com"):
 +        self.base_url = base_url
 +        self.tests_run = 0
 +        self.tests_passed = 0

@@ -117,7 +117,7 @@ class PreviewURLManager:
         mock_uuid = f"temp-{timestamp}-needs-real-url"
         
         # This would be replaced with actual API call
-        new_url = f"https://{mock_uuid}.preview.emergentagent.com"
+        new_url = f"https://medreg-system.preview.emergentagent.com"
         
         logger.info("=" * 60)
         logger.info("MANUAL ACTION REQUIRED:")
