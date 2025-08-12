@@ -263,6 +263,190 @@ class MediPOSAPITester:
             data=backup_options
         )
 
+    def test_patient_management(self):
+        """Test patient management endpoints"""
+        print("\n" + "="*60)
+        print("TESTING PATIENT MANAGEMENT")
+        print("="*60)
+        
+        # Test fee settings endpoints
+        self.run_test("Get Fee Settings", "GET", "api/patients/fee-settings")
+        
+        # Test updating fee settings
+        fee_settings = {
+            "consultation_fee": 150.0,
+            "procedures": [
+                {
+                    "name": "Blood Test",
+                    "fee": 200.0,
+                    "description": "Complete blood count test"
+                },
+                {
+                    "name": "X-Ray",
+                    "fee": 300.0,
+                    "description": "Chest X-Ray examination"
+                }
+            ]
+        }
+        
+        self.run_test(
+            "Update Fee Settings",
+            "PUT",
+            "api/patients/fee-settings",
+            expected_status=200,
+            data=fee_settings
+        )
+        
+        # Test patient CRUD operations
+        test_patient = {
+            "name": f"Dr. Sarah Johnson {datetime.now().strftime('%H%M%S')}",
+            "phone": f"555-{datetime.now().strftime('%H%M%S')}",
+            "address": "123 Medical Center Drive, Healthcare City",
+            "date_of_birth": "1985-03-15",
+            "gender": "Female"
+        }
+        
+        # Add patient
+        success, patient_response = self.run_test(
+            "Add Patient",
+            "POST",
+            "api/patients",
+            expected_status=200,
+            data=test_patient
+        )
+        
+        patient_id = None
+        if success and patient_response.get('id'):
+            patient_id = patient_response['id']
+            print(f"   Created patient with ID: {patient_id}")
+            
+            # Test getting specific patient
+            self.run_test(
+                "Get Specific Patient",
+                "GET",
+                f"api/patients/{patient_id}",
+                expected_status=200
+            )
+            
+            # Test updating patient
+            update_data = {
+                "phone": f"555-{datetime.now().strftime('%M%S')}-UPDATED",
+                "address": "456 Updated Medical Plaza"
+            }
+            
+            self.run_test(
+                "Update Patient",
+                "PUT",
+                f"api/patients/{patient_id}",
+                expected_status=200,
+                data=update_data
+            )
+            
+            # Test patient visits
+            visit_data = {
+                "patient_id": patient_id,
+                "service_type": "consultation",
+                "fee_amount": 150.0,
+                "payment_method": "cash",
+                "notes": "Regular checkup visit"
+            }
+            
+            # Add patient visit
+            success, visit_response = self.run_test(
+                "Add Patient Visit",
+                "POST",
+                "api/patients/visits",
+                expected_status=200,
+                data=visit_data
+            )
+            
+            visit_id = None
+            if success and visit_response.get('id'):
+                visit_id = visit_response['id']
+                print(f"   Created visit with ID: {visit_id}")
+                
+                # Test getting patient visits
+                self.run_test(
+                    "Get Patient Visits",
+                    "GET",
+                    f"api/patients/{patient_id}/visits",
+                    expected_status=200
+                )
+                
+                # Test updating visit
+                visit_update = {
+                    "patient_id": patient_id,
+                    "service_type": "procedure",
+                    "procedure_name": "Blood Test",
+                    "fee_amount": 200.0,
+                    "payment_method": "card",
+                    "notes": "Updated to blood test procedure"
+                }
+                
+                self.run_test(
+                    "Update Patient Visit",
+                    "PUT",
+                    f"api/patients/visits/{visit_id}",
+                    expected_status=200,
+                    data=visit_update
+                )
+                
+                # Test deleting visit
+                self.run_test(
+                    "Delete Patient Visit",
+                    "DELETE",
+                    f"api/patients/visits/{visit_id}",
+                    expected_status=200
+                )
+            
+            # Test deleting patient
+            self.run_test(
+                "Delete Patient",
+                "DELETE",
+                f"api/patients/{patient_id}",
+                expected_status=200
+            )
+        
+        # Test getting all patients
+        self.run_test("Get All Patients", "GET", "api/patients")
+        
+        # Test patient search
+        self.run_test("Search Patients", "GET", "api/patients?search=Dr")
+        
+        # Test getting all visits
+        self.run_test("Get All Visits", "GET", "api/patients/visits")
+        
+        # Test visits with date filtering
+        self.run_test("Get Today's Visits", "GET", "api/patients/visits?date_range=today")
+        self.run_test("Get This Month's Visits", "GET", "api/patients/visits?date_range=this_month")
+        
+        # Test patient analytics
+        analytics_data = {
+            "date_range": "this_month"
+        }
+        
+        self.run_test(
+            "Get Patient Analytics - This Month",
+            "POST",
+            "api/patients/analytics",
+            expected_status=200,
+            data=analytics_data
+        )
+        
+        # Test analytics with custom date range
+        analytics_custom = {
+            "start_date": "2024-01-01",
+            "end_date": "2024-12-31"
+        }
+        
+        self.run_test(
+            "Get Patient Analytics - Custom Range",
+            "POST",
+            "api/patients/analytics",
+            expected_status=200,
+            data=analytics_custom
+        )
+
     def test_error_handling(self):
         """Test error handling for invalid requests"""
         print("\n" + "="*60)
@@ -275,6 +459,23 @@ class MediPOSAPITester:
             "GET",
             "api/medicines/invalid_id",
             expected_status=404
+        )
+        
+        # Test invalid patient ID
+        self.run_test(
+            "Get Invalid Patient",
+            "GET",
+            "api/patients/invalid_id",
+            expected_status=404
+        )
+        
+        # Test invalid visit ID
+        self.run_test(
+            "Get Invalid Visit",
+            "PUT",
+            "api/patients/visits/invalid_id",
+            expected_status=404,
+            data={"patient_id": "test", "service_type": "consultation", "fee_amount": 100}
         )
         
         # Test invalid endpoint
