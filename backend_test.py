@@ -497,6 +497,7 @@ class MediPOSAPITester:
             self.test_basic_endpoints()
             self.test_medicine_management()
             self.test_sales_management()
+            self.test_patient_management()  # Add patient management tests
             self.test_telegram_functionality()
             self.test_tally_import_endpoints()
             self.test_backup_restore_endpoints()
