@@ -1480,10 +1480,15 @@ const RMSApp = () => {
               isReturnMode 
                 ? 'border-orange-300 focus:ring-orange-500 bg-orange-50' 
                 : 'border-slate-300 focus:ring-blue-500'
-            }`}
+            } ${keyboardNavMode ? 'ring-2 ring-blue-300' : ''}`}
             value={isReturnMode ? returnSearchTerm : searchTerm}
             onChange={(e) => isReturnMode ? handleReturnSearch(e.target.value) : handleSearch(e.target.value)}
           />
+          {keyboardNavMode && (
+            <div className="absolute -top-6 left-0 text-xs text-blue-600 font-medium">
+              ⌨️ Keyboard Mode: Press Enter to add selected medicine
+            </div>
+          )}
           {isQuickEntry && (
             <div className="absolute top-full left-0 mt-1 bg-yellow-100 border border-yellow-300 px-3 py-1 rounded text-sm">
               Quick Quantity: {quickQuantity} (Press + to add, Backspace to edit)
