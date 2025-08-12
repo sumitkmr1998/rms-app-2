@@ -234,18 +234,94 @@ const RMSApp = () => {
   useEffect(() => {
     const handleKeyPress = (e) => {
       // Don't trigger shortcuts if user is typing in an input
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        // Handle Enter key in search
-        if (e.key === 'Enter' && e.target === searchRef.current) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        // Handle Enter key navigation flow
+        if (e.key === 'Enter') {
           e.preventDefault();
-          if (medicines.length > 0) {
-            if (isReturnMode) {
-              addToReturnCart(medicines[selectedMedicineIndex]);
-            } else {
-              addToCart(medicines[selectedMedicineIndex]);
+          
+          // Search field - add selected medicine to cart and focus quantity
+          if (e.target === searchRef.current) {
+            if (medicines.length > 0) {
+              if (isReturnMode) {
+                addToReturnCart(medicines[selectedMedicineIndex]);
+              } else {
+                addToCart(medicines[selectedMedicineIndex]);
+              }
+              // Focus on quantity input for the last added item
+              setTimeout(() => {
+                const quantityInputs = document.querySelectorAll('[data-quantity-input]');
+                if (quantityInputs.length > 0) {
+                  quantityInputs[quantityInputs.length - 1].focus();
+                  quantityInputs[quantityInputs.length - 1].select();
+                }
+              }, 100);
             }
+            return;
+          }
+          
+          // Return search field
+          if (e.target === returnSearchRef.current) {
+            if (medicines.length > 0) {
+              addToReturnCart(medicines[selectedMedicineIndex]);
+              // Focus on quantity input for the last added item
+              setTimeout(() => {
+                const quantityInputs = document.querySelectorAll('[data-quantity-input]');
+                if (quantityInputs.length > 0) {
+                  quantityInputs[quantityInputs.length - 1].focus();
+                  quantityInputs[quantityInputs.length - 1].select();
+                }
+              }, 100);
+            }
+            return;
+          }
+          
+          // Quantity input - focus discount
+          if (e.target.hasAttribute('data-quantity-input')) {
+            // Focus discount value if discount type is not 'none'
+            if (discountType !== 'none') {
+              discountValueRef.current?.focus();
+              discountValueRef.current?.select();
+            } else {
+              // Skip to customer name
+              customerNameRef.current?.focus();
+              customerNameRef.current?.select();
+            }
+            return;
+          }
+          
+          // Discount value input - focus customer name
+          if (e.target === discountValueRef.current) {
+            customerNameRef.current?.focus();
+            customerNameRef.current?.select();
+            return;
+          }
+          
+          // Customer name input - focus customer phone
+          if (e.target === customerNameRef.current) {
+            customerPhoneRef.current?.focus();
+            customerPhoneRef.current?.select();
+            return;
+          }
+          
+          // Customer phone input - focus payment method
+          if (e.target === customerPhoneRef.current) {
+            paymentMethodRef.current?.focus();
+            return;
+          }
+          
+          // Payment method - focus complete sale button
+          if (e.target === paymentMethodRef.current) {
+            completeSaleRef.current?.focus();
+            return;
+          }
+          
+          // Complete sale button - trigger checkout
+          if (e.target === completeSaleRef.current) {
+            handleCheckout();
+            return;
           }
         }
+        
         // Handle Escape to blur input
         if (e.key === 'Escape') {
           e.target.blur();
