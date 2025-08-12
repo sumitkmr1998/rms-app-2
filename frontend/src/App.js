@@ -1645,6 +1645,7 @@ const RMSApp = () => {
               onChange={(e) => setCustomerName(e.target.value)}
             />
             <input
+              ref={customerPhoneRef}
               type="text"
               placeholder="Customer Phone"
               className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
