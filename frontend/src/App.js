@@ -819,16 +819,30 @@ const RMSApp = () => {
   };
 
   // Search handler
-  const handleSearch = (term) => {
+  const handleSearch = useCallback((term) => {
     setSearchTerm(term);
     fetchMedicines(term);
-  };
+    
+    // Maintain focus after state update
+    setTimeout(() => {
+      if (searchRef.current && document.activeElement !== searchRef.current) {
+        searchRef.current.focus();
+      }
+    }, 0);
+  }, []);
 
   // NEW: Return search handler
-  const handleReturnSearch = (term) => {
+  const handleReturnSearch = useCallback((term) => {
     setReturnSearchTerm(term);
     fetchMedicines(term); // Search in same medicines database
-  };
+    
+    // Maintain focus after state update
+    setTimeout(() => {
+      if (returnSearchRef.current && document.activeElement !== returnSearchRef.current) {
+        returnSearchRef.current.focus();
+      }
+    }, 0);
+  }, []);
 
   // Print handling functions
   const handlePrintInvoice = async (saleData, skipPreview = false) => {
