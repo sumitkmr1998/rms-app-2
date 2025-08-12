@@ -2230,6 +2230,7 @@ const RMSApp = () => {
           {currentView === 'sales' && <SalesManagement />}
           {currentView === 'analytics' && <AnalyticsDashboard />}
           {currentView === 'inventory' && <InventoryManagement />}
+          {currentView === 'patients' && <PatientManagement />}
           {currentView === 'settings' && <Settings />}
         </>
       )}
