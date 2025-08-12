@@ -1643,12 +1643,17 @@ const RMSApp = () => {
         {/* Customer Info */}
         <div className="border-t border-slate-200 pt-4 mb-4">
           <h4 className="font-semibold text-slate-900 mb-3">👤 Customer Info (Optional)</h4>
+          {keyboardNavMode && (
+            <div className="text-xs text-blue-600 font-medium mb-2">
+              ⌨️ Press Enter to navigate between fields
+            </div>
+          )}
           <div className="space-y-3">
             <input
               ref={customerNameRef}
               type="text"
               placeholder="Customer Name"
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${keyboardNavMode ? 'transition-all duration-200' : ''}`}
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
             />
@@ -1656,7 +1661,7 @@ const RMSApp = () => {
               ref={customerPhoneRef}
               type="text"
               placeholder="Customer Phone"
-              className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${keyboardNavMode ? 'transition-all duration-200' : ''}`}
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
             />
