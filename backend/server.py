@@ -2466,6 +2466,423 @@ async def upload_backup_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
+# Patient Management API Endpoints
+
+# Helper function to generate patient number
+async def generate_patient_number():
+    """Generate unique patient number like PAT001"""
+    try:
+        last_patient = await db.patients.find().sort("created_at", -1).limit(1).to_list(1)
+        if last_patient:
+            # Extract number from last patient number and increment
+            last_number = last_patient[0].get("patient_number", "PAT000")
+            number_part = int(last_number.replace("PAT", "")) + 1
+        else:
+            number_part = 1
+        return f"PAT{number_part:03d}"
+    except:
+        return f"PAT001"
+
+# Default fee settings endpoints
+@api_router.get("/patients/fee-settings")
+async def get_fee_settings():
+    """Get default fee settings"""
+    try:
+        settings = await db.fee_settings.find_one()
+        if settings:
+            settings.pop("_id", None)
+            return settings
+        else:
+            # Return default settings
+            default_settings = DefaultFeeSettings()
+            return default_settings.dict()
+    except Exception as e:
+        logging.error(f"Error fetching fee settings: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching fee settings")
+
+@api_router.put("/patients/fee-settings")
+async def update_fee_settings(settings_data: DefaultFeeSettings):
+    """Update default fee settings"""
+    try:
+        existing_settings = await db.fee_settings.find_one()
+        
+        if existing_settings:
+            # Update existing settings
+            update_data = settings_data.dict()
+            update_data["updated_at"] = datetime.utcnow()
+            
+            result = await db.fee_settings.update_one(
+                {"id": existing_settings["id"]},
+                {"$set": update_data}
+            )
+            
+            if result.modified_count:
+                updated_settings = await db.fee_settings.find_one({"id": existing_settings["id"]})
+                updated_settings.pop("_id", None)
+                return updated_settings
+            else:
+                existing_settings.pop("_id", None)
+                return existing_settings
+        else:
+            # Create new settings
+            settings_dict = settings_data.dict()
+            await db.fee_settings.insert_one(settings_dict)
+            return settings_dict
+            
+    except Exception as e:
+        logging.error(f"Error updating fee settings: {e}")
+        raise HTTPException(status_code=500, detail="Error updating fee settings")
+
+# Patient CRUD endpoints
+@api_router.get("/patients")
+async def get_patients(search: str = ""):
+    """Get all patients with optional search"""
+    try:
+        if search:
+            query = {
+                "$or": [
+                    {"name": {"$regex": search, "$options": "i"}},
+                    {"phone": {"$regex": search, "$options": "i"}},
+                    {"patient_number": {"$regex": search, "$options": "i"}}
+                ]
+            }
+        else:
+            query = {}
+            
+        patients = await db.patients.find(query).sort("created_at", -1).to_list(1000)
+        
+        for patient in patients:
+            if "_id" in patient:
+                patient.pop("_id")
+                
+        return {"patients": patients}
+    except Exception as e:
+        logging.error(f"Error fetching patients: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching patients")
+
+@api_router.post("/patients")
+async def add_patient(patient_data: PatientCreate):
+    """Add a new patient"""
+    try:
+        patient_number = await generate_patient_number()
+        
+        patient = Patient(
+            name=patient_data.name,
+            phone=patient_data.phone,
+            address=patient_data.address,
+            patient_number=patient_number,
+            date_of_birth=patient_data.date_of_birth,
+            gender=patient_data.gender
+        )
+        
+        patient_dict = patient.dict()
+        await db.patients.insert_one(patient_dict)
+        
+        return patient
+    except Exception as e:
+        logging.error(f"Error adding patient: {e}")
+        raise HTTPException(status_code=500, detail="Error adding patient")
+
+@api_router.get("/patients/{patient_id}")
+async def get_patient(patient_id: str):
+    """Get a specific patient"""
+    try:
+        patient = await db.patients.find_one({"id": patient_id})
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        
+        patient.pop("_id", None)
+        return patient
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching patient: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching patient")
+
+@api_router.put("/patients/{patient_id}")
+async def update_patient(patient_id: str, patient_data: PatientUpdate):
+    """Update patient information"""
+    try:
+        update_data = {k: v for k, v in patient_data.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow()
+        
+        result = await db.patients.update_one(
+            {"id": patient_id},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count:
+            updated_patient = await db.patients.find_one({"id": patient_id})
+            if updated_patient:
+                updated_patient.pop("_id", None)
+            return updated_patient
+        else:
+            raise HTTPException(status_code=404, detail="Patient not found")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating patient: {e}")
+        raise HTTPException(status_code=500, detail="Error updating patient")
+
+@api_router.delete("/patients/{patient_id}")
+async def delete_patient(patient_id: str):
+    """Delete a patient"""
+    try:
+        result = await db.patients.delete_one({"id": patient_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        
+        return {"success": True, "message": "Patient deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting patient: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting patient")
+
+# Patient visit endpoints
+@api_router.get("/patients/{patient_id}/visits")
+async def get_patient_visits(patient_id: str):
+    """Get all visits for a specific patient"""
+    try:
+        visits = await db.patient_visits.find({"patient_id": patient_id}).sort("visit_date", -1).to_list(1000)
+        
+        for visit in visits:
+            if "_id" in visit:
+                visit.pop("_id")
+                
+        return {"visits": visits}
+    except Exception as e:
+        logging.error(f"Error fetching patient visits: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching patient visits")
+
+@api_router.post("/patients/visits")
+async def add_patient_visit(visit_data: PatientVisitCreate):
+    """Add a new patient visit"""
+    try:
+        # Get patient details for the visit
+        patient = await db.patients.find_one({"id": visit_data.patient_id})
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        
+        visit = PatientVisit(
+            patient_id=visit_data.patient_id,
+            patient_name=patient["name"],
+            service_type=visit_data.service_type,
+            procedure_name=visit_data.procedure_name,
+            fee_amount=visit_data.fee_amount,
+            total_fee=visit_data.fee_amount,  # For now, total equals fee_amount
+            payment_method=visit_data.payment_method,
+            notes=visit_data.notes
+        )
+        
+        visit_dict = visit.dict()
+        await db.patient_visits.insert_one(visit_dict)
+        
+        return visit
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error adding patient visit: {e}")
+        raise HTTPException(status_code=500, detail="Error adding patient visit")
+
+@api_router.get("/patients/visits")
+async def get_all_visits(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    date_range: Optional[str] = None
+):
+    """Get all patient visits with optional date filtering"""
+    try:
+        query = {}
+        
+        # Handle date filtering
+        if date_range:
+            today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            if date_range == "today":
+                tomorrow = today + timedelta(days=1)
+                query["visit_date"] = {"$gte": today, "$lt": tomorrow}
+                period_label = "Today"
+            elif date_range == "yesterday":
+                yesterday = today - timedelta(days=1)
+                query["visit_date"] = {"$gte": yesterday, "$lt": today}
+                period_label = "Yesterday"
+            elif date_range == "this_month":
+                start_month = today.replace(day=1)
+                # Get first day of next month
+                if today.month == 12:
+                    end_month = today.replace(year=today.year + 1, month=1, day=1)
+                else:
+                    end_month = today.replace(month=today.month + 1, day=1)
+                query["visit_date"] = {"$gte": start_month, "$lt": end_month}
+                period_label = "This Month"
+        elif start_date and end_date:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
+            query["visit_date"] = {"$gte": start_dt, "$lt": end_dt}
+            period_label = f"{start_date} to {end_date}"
+        else:
+            period_label = "All Time"
+            
+        visits = await db.patient_visits.find(query).sort("visit_date", -1).to_list(1000)
+        
+        for visit in visits:
+            if "_id" in visit:
+                visit.pop("_id")
+                
+        return {"visits": visits, "period_label": period_label}
+    except Exception as e:
+        logging.error(f"Error fetching visits: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching visits")
+
+@api_router.put("/patients/visits/{visit_id}")
+async def update_patient_visit(visit_id: str, visit_data: PatientVisitCreate):
+    """Update a patient visit"""
+    try:
+        update_data = {
+            "service_type": visit_data.service_type,
+            "procedure_name": visit_data.procedure_name,
+            "fee_amount": visit_data.fee_amount,
+            "total_fee": visit_data.fee_amount,
+            "payment_method": visit_data.payment_method,
+            "notes": visit_data.notes
+        }
+        
+        result = await db.patient_visits.update_one(
+            {"id": visit_id},
+            {"$set": update_data}
+        )
+        
+        if result.modified_count:
+            updated_visit = await db.patient_visits.find_one({"id": visit_id})
+            if updated_visit:
+                updated_visit.pop("_id", None)
+            return updated_visit
+        else:
+            raise HTTPException(status_code=404, detail="Visit not found")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error updating visit: {e}")
+        raise HTTPException(status_code=500, detail="Error updating visit")
+
+@api_router.delete("/patients/visits/{visit_id}")
+async def delete_patient_visit(visit_id: str):
+    """Delete a patient visit"""
+    try:
+        result = await db.patient_visits.delete_one({"id": visit_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Visit not found")
+        
+        return {"success": True, "message": "Visit deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error deleting visit: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting visit")
+
+# Patient analytics endpoint
+@api_router.post("/patients/analytics")
+async def get_patient_analytics(analytics_request: PatientAnalyticsRequest):
+    """Get patient analytics with date filtering"""
+    try:
+        query = {}
+        period_label = "All Time"
+        
+        # Handle date filtering
+        if analytics_request.date_range:
+            today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            if analytics_request.date_range == "today":
+                tomorrow = today + timedelta(days=1)
+                query["visit_date"] = {"$gte": today, "$lt": tomorrow}
+                period_label = "Today"
+            elif analytics_request.date_range == "yesterday":
+                yesterday = today - timedelta(days=1)
+                query["visit_date"] = {"$gte": yesterday, "$lt": today}
+                period_label = "Yesterday"
+            elif analytics_request.date_range == "this_month":
+                start_month = today.replace(day=1)
+                if today.month == 12:
+                    end_month = today.replace(year=today.year + 1, month=1, day=1)
+                else:
+                    end_month = today.replace(month=today.month + 1, day=1)
+                query["visit_date"] = {"$gte": start_month, "$lt": end_month}
+                period_label = "This Month"
+        elif analytics_request.start_date and analytics_request.end_date:
+            start_dt = datetime.strptime(analytics_request.start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(analytics_request.end_date, "%Y-%m-%d") + timedelta(days=1)
+            query["visit_date"] = {"$gte": start_dt, "$lt": end_dt}
+            period_label = f"{analytics_request.start_date} to {analytics_request.end_date}"
+        
+        # Get visits based on query
+        visits = await db.patient_visits.find(query).to_list(10000)
+        
+        # Calculate analytics
+        total_visits = len(visits)
+        total_revenue = sum(visit.get("total_fee", 0) for visit in visits)
+        
+        consultations = [v for v in visits if v.get("service_type") == "consultation"]
+        procedures = [v for v in visits if v.get("service_type") == "procedure"]
+        
+        consultations_count = len(consultations)
+        procedures_count = len(procedures)
+        consultation_revenue = sum(v.get("total_fee", 0) for v in consultations)
+        procedure_revenue = sum(v.get("total_fee", 0) for v in procedures)
+        
+        # Get total unique patients
+        total_patients = await db.patients.count_documents({})
+        
+        # Daily visits for charts
+        daily_visits = {}
+        for visit in visits:
+            visit_date = visit.get("visit_date")
+            if visit_date:
+                date_key = visit_date.strftime("%Y-%m-%d")
+                if date_key not in daily_visits:
+                    daily_visits[date_key] = {"date": date_key, "visits": 0, "revenue": 0}
+                daily_visits[date_key]["visits"] += 1
+                daily_visits[date_key]["revenue"] += visit.get("total_fee", 0)
+        
+        daily_visits_list = sorted(daily_visits.values(), key=lambda x: x["date"])
+        
+        # Popular procedures
+        procedure_stats = defaultdict(lambda: {"count": 0, "revenue": 0})
+        for visit in procedures:
+            proc_name = visit.get("procedure_name", "Unknown Procedure")
+            procedure_stats[proc_name]["count"] += 1
+            procedure_stats[proc_name]["revenue"] += visit.get("total_fee", 0)
+        
+        popular_procedures = [
+            {"name": name, "count": stats["count"], "revenue": stats["revenue"]}
+            for name, stats in procedure_stats.items()
+        ]
+        popular_procedures = sorted(popular_procedures, key=lambda x: x["count"], reverse=True)[:10]
+        
+        return PatientAnalyticsResponse(
+            total_patients=total_patients,
+            total_visits=total_visits,
+            total_revenue=total_revenue,
+            consultations_count=consultations_count,
+            procedures_count=procedures_count,
+            consultation_revenue=consultation_revenue,
+            procedure_revenue=procedure_revenue,
+            daily_visits=daily_visits_list,
+            popular_procedures=popular_procedures,
+            date_range=analytics_request.date_range or "custom",
+            period_label=period_label
+        )
+        
+    except Exception as e:
+        logging.error(f"Error getting patient analytics: {e}")
+        raise HTTPException(status_code=500, detail="Error getting patient analytics")
+
 # Include the router in the main app
 app.include_router(api_router)
 
