@@ -1318,6 +1318,14 @@ const RMSApp = () => {
               Analytics <span className="text-xs opacity-75">(Ctrl+A)</span>
             </button>
           )}
+          {canAccessView('patients') && (
+            <button
+              onClick={() => setCurrentView('patients')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${currentView === 'patients' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            >
+              👥 Patients <span className="text-xs opacity-75">(Ctrl+T)</span>
+            </button>
+          )}
           {(canAccessView('users') || canAccessView('shop') || canAccessView('backup') || canAccessView('telegram')) && (
             <button
               onClick={() => setCurrentView('settings')}
