@@ -2738,56 +2738,6 @@ async def add_patient_visit(visit_data: PatientVisitCreate):
         logging.error(f"Error adding patient visit: {e}")
         raise HTTPException(status_code=500, detail="Error adding patient visit")
 
-@api_router.get("/patients/visits")
-async def get_all_visits(
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    date_range: Optional[str] = None
-):
-    """Get all patient visits with optional date filtering"""
-    try:
-        query = {}
-        
-        # Handle date filtering
-        if date_range:
-            today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-            
-            if date_range == "today":
-                tomorrow = today + timedelta(days=1)
-                query["visit_date"] = {"$gte": today, "$lt": tomorrow}
-                period_label = "Today"
-            elif date_range == "yesterday":
-                yesterday = today - timedelta(days=1)
-                query["visit_date"] = {"$gte": yesterday, "$lt": today}
-                period_label = "Yesterday"
-            elif date_range == "this_month":
-                start_month = today.replace(day=1)
-                # Get first day of next month
-                if today.month == 12:
-                    end_month = today.replace(year=today.year + 1, month=1, day=1)
-                else:
-                    end_month = today.replace(month=today.month + 1, day=1)
-                query["visit_date"] = {"$gte": start_month, "$lt": end_month}
-                period_label = "This Month"
-        elif start_date and end_date:
-            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-            end_dt = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
-            query["visit_date"] = {"$gte": start_dt, "$lt": end_dt}
-            period_label = f"{start_date} to {end_date}"
-        else:
-            period_label = "All Time"
-            
-        visits = await db.patient_visits.find(query).sort("visit_date", -1).to_list(1000)
-        
-        for visit in visits:
-            if "_id" in visit:
-                visit.pop("_id")
-                
-        return {"visits": visits, "period_label": period_label}
-    except Exception as e:
-        logging.error(f"Error fetching visits: {e}")
-        raise HTTPException(status_code=500, detail="Error fetching visits")
-
 @api_router.put("/patients/visits/{visit_id}")
 async def update_patient_visit(visit_id: str, visit_data: PatientVisitCreate):
     """Update a patient visit"""
