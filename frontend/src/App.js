@@ -829,7 +829,7 @@ const RMSApp = () => {
         searchRef.current.focus();
       }
     }, 0);
-  }, []);
+  }, [getMedicines]);
 
   // NEW: Return search handler
   const handleReturnSearch = useCallback((term) => {
@@ -842,7 +842,7 @@ const RMSApp = () => {
         returnSearchRef.current.focus();
       }
     }, 0);
-  }, []);
+  }, [getMedicines]);
 
   // Print handling functions
   const handlePrintInvoice = async (saleData, skipPreview = false) => {
